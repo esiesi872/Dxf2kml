@@ -1,0 +1,1003 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>استخراج مختصات از KML، KMZ و DXF به فایل متنی | ابزار آنلاین رایگان</title>
+<meta name="description" content="ابزار رایگان و آنلاین برای استخراج مختصات رئوس پلیگون، پلی‌لاین و مسیر از فایل‌های KML، KMZ و DXF و خروجی به‌صورت فایل متنی با ستون‌بندی، قالب و مبنای مختصات دلخواه (از جمله UTM). پردازش کاملاً در مرورگر و بدون آپلود به سرور.">
+<meta name="keywords" content="استخراج مختصات, KML به متن, KMZ به متن, DXF به مختصات, تبدیل UTM, مختصات پلیگون, مختصات پلی‌لاین, نقشه‌برداری, GIS, ابزار آنلاین رایگان">
+<meta name="robots" content="index, follow">
+<meta name="author" content="esiesi872">
+<link rel="canonical" href="https://esiesi872.github.io/Dxf2kml/Kdz2txt/">
+<link rel="icon" type="image/svg+xml" href="../favicon.svg">
+
+<meta property="og:type" content="website">
+<meta property="og:title" content="استخراج مختصات از KML، KMZ و DXF به فایل متنی">
+<meta property="og:description" content="ابزار رایگان آنلاین برای استخراج مختصات رئوس پلیگون و پلی‌لاین از KML، KMZ و DXF، با امکان انتخاب ستون‌ها، قالب سفارشی و تبدیل مبنای مختصات (UTM).">
+<meta property="og:url" content="https://esiesi872.github.io/Dxf2kml/Kdz2txt/">
+<meta property="og:locale" content="fa_IR">
+
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="استخراج مختصات از KML، KMZ و DXF به فایل متنی">
+<meta name="twitter:description" content="استخراج مختصات رئوس پلیگون و پلی‌لاین از KML، KMZ و DXF به‌صورت آنلاین و بدون نیاز به سرور.">
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/proj4js/2.20.9/proj4.js"></script>
+<script>
+            !function(e,t,n){e.yektanetAnalyticsObject=n,e[n]=e[n]||function(){e[n].q.push(arguments)},e[n].q=e[n].q||[];var a=t.getElementsByTagName("head")[0],r=new Date,c="https://cdn.yektanet.com/superscript/1uxkPP1m/native-esiesi872.github.io-47382/yn_pub.js?v="+r.getFullYear().toString()+"0"+r.getMonth()+"0"+r.getDate()+"0"+r.getHours(),s=t.createElement("link");s.rel="preload",s.as="script",s.href=c,a.appendChild(s);var l=t.createElement("script");l.async=!0,l.src=c,a.appendChild(l)}(window,document,"yektanet");
+        </script>
+<style>
+  :root{
+    --navy:#0f2138;
+    --navy-2:#16304f;
+    --grid:#1e3a5f;
+    --paper:#eef2f6;
+    --amber:#d98a2b;
+    --amber-2:#f0a94e;
+    --ink:#0f2138;
+    --muted:#5c7594;
+    --ok:#3fa17a;
+    --err:#c85a4a;
+    --mono: 'Courier New', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    --sans: 'Segoe UI', Tahoma, Arial, sans-serif;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    font-family:var(--sans);
+    background:
+      linear-gradient(var(--grid) 1px, transparent 1px) 0 0/40px 40px,
+      linear-gradient(90deg, var(--grid) 1px, transparent 1px) 0 0/40px 40px,
+      var(--navy);
+    color:var(--paper);
+    min-height:100vh;
+  }
+  header{
+    padding:36px 24px 22px;
+    border-bottom:2px solid var(--amber);
+    background:linear-gradient(180deg, rgba(15,33,56,.85), rgba(15,33,56,.35));
+    position:relative;
+  }
+  .back-link{
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+    font-family:var(--mono);
+    font-size:12.5px;
+    color:var(--amber-2);
+    text-decoration:none;
+    border:1px solid var(--grid);
+    padding:6px 12px;
+    border-radius:4px;
+    margin-bottom:16px;
+    transition:.15s border-color, .15s color;
+  }
+  .back-link:hover{
+    border-color:var(--amber);
+    color:var(--amber);
+  }
+  header .eyebrow{
+    font-family:var(--mono);
+    letter-spacing:.18em;
+    text-transform:uppercase;
+    color:var(--amber-2);
+    font-size:12px;
+    margin-bottom:8px;
+  }
+  header h1{
+    margin:0 0 8px;
+    font-size:28px;
+    font-weight:700;
+  }
+  header p{
+    margin:0;
+    color:#b9c8db;
+    max-width:760px;
+    line-height:1.8;
+    font-size:14px;
+  }
+  main{
+    max-width:1100px;
+    margin:0 auto;
+    padding:28px 24px 80px;
+    display:grid;
+    gap:20px;
+  }
+  .panel{
+    background:var(--navy-2);
+    border:1px solid var(--grid);
+    border-radius:6px;
+    padding:20px;
+  }
+  .panel h2{
+    margin:0 0 4px;
+    font-size:15px;
+    font-family:var(--mono);
+    letter-spacing:.05em;
+    color:var(--amber-2);
+    display:flex;
+    align-items:center;
+    gap:8px;
+  }
+  .panel h2::before{
+    content:'';
+    width:8px;height:8px;
+    background:var(--amber);
+    display:inline-block;
+    transform:rotate(45deg);
+  }
+  .panel .hint{
+    color:var(--muted);
+    font-size:12.5px;
+    margin:0 0 16px;
+    line-height:1.7;
+  }
+  .dropzone{
+    border:2px dashed var(--grid);
+    border-radius:6px;
+    padding:28px;
+    text-align:center;
+    cursor:pointer;
+    transition:.15s border-color;
+  }
+  .dropzone:hover, .dropzone.drag{
+    border-color:var(--amber);
+    background:rgba(217,138,43,.06);
+  }
+  .dropzone strong{color:var(--amber-2);}
+  .dropzone small{display:block;color:var(--muted);margin-top:6px;font-size:12px;}
+  input[type=file]{display:none;}
+  .filelist{list-style:none;margin:14px 0 0;padding:0;display:grid;gap:6px;}
+  .filelist li{
+    display:flex;justify-content:space-between;align-items:center;
+    background:var(--navy);
+    border:1px solid var(--grid);
+    border-radius:4px;
+    padding:8px 12px;
+    font-family:var(--mono);
+    font-size:12.5px;
+  }
+  .filelist li .status.ok{color:var(--ok);}
+  .filelist li .status.err{color:var(--err);}
+  .filelist li button{
+    background:none;border:none;color:var(--muted);cursor:pointer;font-size:16px;line-height:1;
+  }
+  .filelist li button:hover{color:var(--err);}
+
+  .cols-grid{display:grid;grid-template-columns:1fr 1fr;gap:24px;}
+  @media (max-width:720px){.cols-grid{grid-template-columns:1fr;}}
+  ul#colList{list-style:none;margin:0;padding:0;display:grid;gap:6px;}
+  ul#colList li{
+    display:flex;align-items:center;gap:10px;
+    background:var(--navy);
+    border:1px solid var(--grid);
+    border-radius:4px;
+    padding:8px 10px;
+    cursor:grab;
+    font-size:13px;
+  }
+  ul#colList li.dragging{opacity:.4;}
+  ul#colList li .handle{color:var(--muted);font-family:var(--mono);}
+  ul#colList li label{display:flex;align-items:center;gap:8px;flex:1;cursor:pointer;}
+  ul#colList li .key{color:var(--muted);font-family:var(--mono);font-size:11px;margin-inline-start:auto;}
+
+  .field-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:14px;margin-top:6px;}
+  .field{display:flex;flex-direction:column;gap:6px;}
+  .field label{font-size:12.5px;color:#b9c8db;}
+  select, input[type=text], input[type=number]{
+    background:var(--navy);
+    border:1px solid var(--grid);
+    color:var(--paper);
+    padding:8px 10px;
+    border-radius:4px;
+    font-family:var(--mono);
+    font-size:13px;
+  }
+  select:focus, input:focus{outline:2px solid var(--amber); outline-offset:1px;}
+  .toggle{display:flex;align-items:center;gap:8px;font-size:12.5px;color:#b9c8db;}
+
+  .actions{display:flex;gap:12px;flex-wrap:wrap;margin-top:6px;}
+  button.primary{
+    background:var(--amber);
+    color:var(--navy);
+    border:none;
+    font-weight:700;
+    padding:12px 22px;
+    border-radius:4px;
+    cursor:pointer;
+    font-size:14px;
+  }
+  button.primary:hover{background:var(--amber-2);}
+  button.primary:disabled{background:var(--grid);color:var(--muted);cursor:not-allowed;}
+  button.secondary{
+    background:transparent;
+    border:1px solid var(--grid);
+    color:var(--paper);
+    padding:12px 18px;
+    border-radius:4px;
+    cursor:pointer;
+    font-size:13px;
+  }
+  button.secondary:hover{border-color:var(--amber);}
+
+  pre#preview{
+    background:var(--navy);
+    border:1px solid var(--grid);
+    border-radius:4px;
+    padding:14px;
+    font-family:var(--mono);
+    font-size:12px;
+    line-height:1.7;
+    max-height:320px;
+    overflow:auto;
+    direction:ltr;
+    text-align:left;
+    white-space:pre;
+  }
+  .summary{font-family:var(--mono);font-size:12.5px;color:var(--amber-2);margin-bottom:10px;}
+  textarea{
+    background:var(--navy);
+    border:1px solid var(--grid);
+    color:var(--paper);
+    padding:10px;
+    border-radius:4px;
+    font-family:var(--mono);
+    font-size:13px;
+    width:100%;
+    min-height:70px;
+    resize:vertical;
+    direction:ltr;
+    text-align:left;
+  }
+  textarea:focus{outline:2px solid var(--amber); outline-offset:1px;}
+  .chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;}
+  .chip{
+    font-family:var(--mono);
+    font-size:11px;
+    background:var(--navy);
+    border:1px solid var(--grid);
+    color:var(--amber-2);
+    padding:4px 8px;
+    border-radius:3px;
+    cursor:pointer;
+  }
+  .chip:hover{border-color:var(--amber);}
+  .subblock{
+    border-inline-start:2px solid var(--grid);
+    padding-inline-start:12px;
+    margin-top:10px;
+    display:none;
+  }
+  .subblock.show{display:grid;}
+  footer{
+    text-align:center;
+    color:var(--muted);
+    font-size:12px;
+    padding:20px;
+    border-top:1px solid var(--grid);
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <a class="back-link" href="../">↩ بازگشت به صفحه اصلی</a>
+  <div class="eyebrow">استخراج مختصات جغرافیایی / نقشه‌برداری</div>
+  <h1>از KML · KMZ · DXF به فایل متنی</h1>
+  <p>فایل‌های خود را بارگذاری کنید تا رئوس پلیگون‌ها، مسیرها و پلی‌لاین‌ها استخراج شوند. ستون‌های خروجی، ترتیب آن‌ها، جداکننده و علامت اعشار را خودتان انتخاب می‌کنید. هر موضوع (Feature) یک شناسه‌ی یکتا می‌گیرد که در تمام سطرهای مربوط به رئوس آن تکرار می‌شود.</p>
+</header>
+
+<main>
+
+  <section class="panel">
+    <h2>۱ · بارگذاری فایل‌ها</h2>
+    <p class="hint">پسوندهای پشتیبانی‌شده: .kml / .kmz / .dxf — می‌توانید چند فایل را هم‌زمان انتخاب کنید. تمام پردازش در همین مرورگر انجام می‌شود و هیچ فایلی به سروری ارسال نمی‌شود.</p>
+    <div class="dropzone" id="dropzone">
+      <strong>برای انتخاب فایل کلیک کنید</strong> یا فایل‌ها را اینجا رها کنید
+      <small>KML, KMZ, DXF</small>
+    </div>
+    <input type="file" id="fileInput" multiple accept=".kml,.kmz,.dxf">
+    <ul class="filelist" id="fileList"></ul>
+  </section>
+
+  <section class="panel">
+    <h2>۲ · ستون‌های خروجی و ترتیب آن‌ها</h2>
+    <p class="hint">تیک بزنید تا ستون در خروجی باشد؛ با کشیدن (Drag) هر سطر، ترتیب ستون‌ها در فایل خروجی را تغییر دهید.</p>
+    <ul id="colList"></ul>
+  </section>
+
+  <section class="panel">
+    <h2>۳ · شماره‌گذاری موضوعات</h2>
+    <p class="hint">به‌جای نام/شناسه‌ی اصلی هر موضوع (که ممکن است خالی یا تکراری باشد)، می‌توانید به هر موضوع یک شماره‌ی یکتای اختصاصی بدهید که در ستون ID برای تمام رئوس آن تکرار می‌شود.</p>
+    <label class="toggle"><input type="checkbox" id="autoIdEnabled"> شماره‌گذاری خودکار موضوعات به‌عنوان ID</label>
+    <div class="field-row subblock" id="autoIdBlock">
+      <div class="field">
+        <label>شروع از</label>
+        <input type="number" id="autoIdStart" value="1" step="1">
+      </div>
+      <div class="field">
+        <label>گام (Step)</label>
+        <input type="number" id="autoIdStep" value="1" step="1">
+      </div>
+      <div class="field">
+        <label>طول صفر پرکن (اختیاری)</label>
+        <input type="number" id="autoIdPad" value="0" min="0" max="10">
+      </div>
+      <div class="field">
+        <label>پیشوند (اختیاری)</label>
+        <input type="text" id="autoIdPrefix" placeholder="مثلاً P-">
+      </div>
+    </div>
+  </section>
+
+  <section class="panel">
+    <h2>۴ · نحوه نگارش</h2>
+    <div class="field-row">
+      <div class="field">
+        <label>جداکننده ستون‌ها</label>
+        <select id="delimiter">
+          <option value=",">کاما ( , )</option>
+          <option value=";" selected>سمی‌کالن ( ; )</option>
+          <option value="\t">Tab</option>
+          <option value=" ">فاصله ( space )</option>
+          <option value="|">خط عمودی ( | )</option>
+          <option value="__custom__">دلخواه…</option>
+        </select>
+        <input type="text" id="delimiterCustom" placeholder="جداکننده دلخواه" style="display:none;">
+      </div>
+      <div class="field">
+        <label>علامت اعشار</label>
+        <select id="decimalSep">
+          <option value="." selected>نقطه ( . )</option>
+          <option value=",">ویرگول ( , )</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>تعداد ارقام اعشار</label>
+        <input type="number" id="precision" value="6" min="0" max="12">
+      </div>
+      <div class="field">
+        <label>پایان خط</label>
+        <select id="lineEnding">
+          <option value="\n" selected>LF (یونیکس / وب)</option>
+          <option value="\r\n">CRLF (ویندوز)</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>پسوند فایل خروجی</label>
+        <select id="ext">
+          <option value="txt" selected>.txt</option>
+          <option value="csv">.csv</option>
+        </select>
+      </div>
+    </div>
+    <div class="field-row" style="margin-top:14px;">
+      <label class="toggle"><input type="checkbox" id="header" checked> سطر عنوان (Header) در ابتدای فایل</label>
+      <label class="toggle"><input type="checkbox" id="swapXY"> جابه‌جایی X/Y هنگام استخراج (برای KML یعنی lat را در X بگذار)</label>
+      <label class="toggle"><input type="checkbox" id="quoteText"> متن‌ها (نام/فایل) داخل گیومه</label>
+      <label class="toggle"><input type="checkbox" id="closeRing" checked> بستن پلیگون: تکرار نقطه‌ی اول در انتهای هر پلیگون</label>
+    </div>
+  </section>
+
+  <section class="panel">
+    <h2>۵ · تبدیل مبنای مختصات (Datum / UTM)</h2>
+    <p class="hint">این تبدیل روی مقادیر X/Y همه‌ی نقاط اعمال می‌شود. برای فایل‌های KML/KMZ مبدأ معمولاً «جغرافیایی WGS84 (طول/عرض)» است. برای DXF، چون فایل مبنای مختصات مشخصی ندارد، مبدأ را بر اساس آنچه می‌دانید انتخاب کنید (مثلاً اگر نقشه از قبل UTM بوده).</p>
+    <label class="toggle"><input type="checkbox" id="convertEnabled"> فعال‌سازی تبدیل مختصات</label>
+
+    <div class="cols-grid subblock" id="convertBlock">
+      <div>
+        <div class="field">
+          <label>مبدأ (سیستم مختصات فایل ورودی)</label>
+          <select id="fromKind">
+            <option value="wgs84">جغرافیایی WGS84 (طول/عرض)</option>
+            <option value="utm">UTM (WGS84)</option>
+          </select>
+        </div>
+        <div class="field-row subblock" id="fromUtmBlock">
+          <div class="field">
+            <label>زون UTM</label>
+            <input type="number" id="fromZone" min="1" max="60" value="39">
+          </div>
+          <div class="field">
+            <label>نیم‌کره</label>
+            <select id="fromHemi">
+              <option value="N">شمالی (N)</option>
+              <option value="S">جنوبی (S)</option>
+            </select>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="field">
+          <label>مقصد (سیستم مختصات خروجی)</label>
+          <select id="toKind">
+            <option value="utm">UTM (WGS84)</option>
+            <option value="wgs84">جغرافیایی WGS84 (طول/عرض)</option>
+          </select>
+        </div>
+        <div class="field-row subblock show" id="toUtmBlock">
+          <div class="field">
+            <label>زون UTM</label>
+            <input type="number" id="toZone" min="1" max="60" value="39">
+          </div>
+          <div class="field">
+            <label>نیم‌کره</label>
+            <select id="toHemi">
+              <option value="N">شمالی (N)</option>
+              <option value="S">جنوبی (S)</option>
+            </select>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="actions subblock" id="detectZoneRow" style="margin-top:14px;">
+      <button class="secondary" id="detectZoneBtn" type="button">تشخیص خودکار زون از روی اولین نقطه بارگذاری‌شده</button>
+      <span id="detectZoneResult" style="font-family:var(--mono);font-size:12px;color:var(--muted);align-self:center;"></span>
+    </div>
+  </section>
+
+  <section class="panel">
+    <h2>۶ · قالب متنی سفارشی (اختیاری)</h2>
+    <p class="hint">اگر خروجی ستون‌بندی‌شده‌ی بخش ۴ کافی نیست، اینجا را فعال کنید و قالب دلخواه خودتان را بنویسید؛ مثلاً: <code>{ID} X={X} Y={Y} Z={Z}</code>. این حالت جایگزین جداکننده و ترتیب ستون‌ها می‌شود (اما شماره‌گذاری خودکار و تبدیل مختصات همچنان اعمال می‌شوند).</p>
+    <label class="toggle"><input type="checkbox" id="templateEnabled"> استفاده از قالب متنی سفارشی به‌جای ستون‌بندی</label>
+    <div class="subblock" id="templateBlock" style="display:none;">
+      <textarea id="templateText" spellcheck="false">{ID} X={X} Y={Y} Z={Z}</textarea>
+      <div class="chips">
+        <span class="chip" data-ph="{ID}">{ID}</span>
+        <span class="chip" data-ph="{POINTINDEX}">{POINTINDEX}</span>
+        <span class="chip" data-ph="{X}">{X}</span>
+        <span class="chip" data-ph="{Y}">{Y}</span>
+        <span class="chip" data-ph="{Z}">{Z}</span>
+        <span class="chip" data-ph="{NAME}">{NAME}</span>
+        <span class="chip" data-ph="{TYPE}">{TYPE}</span>
+        <span class="chip" data-ph="{SOURCE}">{SOURCE}</span>
+      </div>
+      <label class="toggle" style="margin-top:10px;"><input type="checkbox" id="blankLineBetween"> یک خط خالی بین موضوعات مختلف</label>
+    </div>
+  </section>
+
+  <section class="panel">
+    <h2>۷ · تولید و دانلود</h2>
+    <div class="summary" id="summary">هیچ موضوعی هنوز استخراج نشده است.</div>
+    <div class="actions">
+      <button class="primary" id="generateBtn" disabled>ساخت فایل خروجی</button>
+      <button class="secondary" id="downloadBtn" style="display:none;">دانلود فایل</button>
+    </div>
+    <div style="margin-top:16px;">
+      <p class="hint" style="margin-bottom:8px;">پیش‌نمایش ۴۰ سطر اول:</p>
+      <pre id="preview">—</pre>
+    </div>
+  </section>
+
+</main>
+
+<footer>پردازش کاملاً سمت کاربر (client-side) و بدون سرور — قابل میزبانی روی GitHub Pages.</footer>
+
+<script>
+// ---------------------------------------------------------------------
+// State
+// ---------------------------------------------------------------------
+let loadedFiles = [];   // {name, status, error}
+let features = [];      // {id, name, type, source, points:[{x,y,z}]}
+let outputText = "";
+let outputExt = "txt";
+
+const COLUMN_DEFS = {
+  id:          { label: "شناسه موضوع (ID)" },
+  pointIndex:  { label: "شماره رأس (PointIndex)" },
+  x:           { label: "X / طول جغرافیایی (Lon)" },
+  y:           { label: "Y / عرض جغرافیایی (Lat)" },
+  z:           { label: "Z / ارتفاع" },
+  name:        { label: "نام موضوع (Name)" },
+  type:        { label: "نوع هندسه (Type)" },
+  source:      { label: "فایل مبدأ (SourceFile)" }
+};
+let columnOrder = ["id","pointIndex","x","y","z","name","type","source"];
+let columnChecked = { id:true, pointIndex:true, x:true, y:true, z:false, name:false, type:false, source:false };
+
+// ---------------------------------------------------------------------
+// Column list UI (drag to reorder)
+// ---------------------------------------------------------------------
+function renderColList(){
+  const ul = document.getElementById('colList');
+  ul.innerHTML = "";
+  columnOrder.forEach((key, idx) => {
+    const li = document.createElement('li');
+    li.draggable = true;
+    li.dataset.key = key;
+    li.innerHTML = `
+      <span class="handle">⠿</span>
+      <label>
+        <input type="checkbox" data-key="${key}" ${columnChecked[key] ? 'checked':''}>
+        ${COLUMN_DEFS[key].label}
+      </label>
+      <span class="key">${key}</span>
+    `;
+    li.querySelector('input').addEventListener('change', e=>{
+      columnChecked[key] = e.target.checked;
+    });
+    li.addEventListener('dragstart', ()=>{ li.classList.add('dragging'); li.dataset.dragging = "1"; });
+    li.addEventListener('dragend', ()=>{ li.classList.remove('dragging'); });
+    li.addEventListener('dragover', e=>{
+      e.preventDefault();
+      const dragging = ul.querySelector('.dragging');
+      if (!dragging || dragging === li) return;
+      const rect = li.getBoundingClientRect();
+      const after = (e.clientY - rect.top) > rect.height/2;
+      ul.insertBefore(dragging, after ? li.nextSibling : li);
+    });
+    li.addEventListener('drop', e=>{
+      e.preventDefault();
+      columnOrder = [...ul.querySelectorAll('li')].map(el=>el.dataset.key);
+    });
+    ul.appendChild(li);
+  });
+}
+renderColList();
+
+document.getElementById('delimiter').addEventListener('change', e=>{
+  document.getElementById('delimiterCustom').style.display = e.target.value === '__custom__' ? 'block':'none';
+});
+
+// ---- toggle sub-blocks ----
+function bindToggle(checkboxId, blockId){
+  const cb = document.getElementById(checkboxId);
+  const block = document.getElementById(blockId);
+  const sync = ()=> block.classList.toggle('show', cb.checked);
+  cb.addEventListener('change', sync);
+  sync();
+}
+bindToggle('autoIdEnabled', 'autoIdBlock');
+bindToggle('convertEnabled', 'convertBlock');
+
+document.getElementById('templateEnabled').addEventListener('change', e=>{
+  document.getElementById('templateBlock').style.display = e.target.checked ? 'block' : 'none';
+});
+
+function syncCrsSubfields(kindSelectId, blockId){
+  const sel = document.getElementById(kindSelectId);
+  const block = document.getElementById(blockId);
+  const sync = ()=> block.classList.toggle('show', sel.value === 'utm');
+  sel.addEventListener('change', sync);
+  sync();
+}
+syncCrsSubfields('fromKind', 'fromUtmBlock');
+syncCrsSubfields('toKind', 'toUtmBlock');
+
+document.querySelectorAll('.chip').forEach(chip=>{
+  chip.addEventListener('click', ()=>{
+    const ta = document.getElementById('templateText');
+    const ph = chip.dataset.ph;
+    const start = ta.selectionStart, end = ta.selectionEnd;
+    ta.value = ta.value.slice(0,start) + ph + ta.value.slice(end);
+    ta.focus();
+    ta.selectionStart = ta.selectionEnd = start + ph.length;
+  });
+});
+
+document.getElementById('detectZoneBtn').addEventListener('click', ()=>{
+  const resultEl = document.getElementById('detectZoneResult');
+  if (document.getElementById('fromKind').value !== 'wgs84'){
+    resultEl.textContent = 'تشخیص خودکار فقط وقتی مبدأ جغرافیایی (WGS84) باشد ممکن است.';
+    return;
+  }
+  const firstPt = features.length ? features[0].points[0] : null;
+  if (!firstPt){
+    resultEl.textContent = 'ابتدا یک فایل بارگذاری کنید.';
+    return;
+  }
+  const zone = Math.floor((firstPt.x + 180) / 6) + 1;
+  const hemi = firstPt.y >= 0 ? 'N' : 'S';
+  document.getElementById('toZone').value = zone;
+  document.getElementById('toHemi').value = hemi;
+  resultEl.textContent = `زون تشخیص داده‌شده برای مقصد: ${zone}${hemi}`;
+});
+
+// ---------------------------------------------------------------------
+// File handling
+// ---------------------------------------------------------------------
+const dropzone = document.getElementById('dropzone');
+const fileInput = document.getElementById('fileInput');
+dropzone.addEventListener('click', ()=>fileInput.click());
+dropzone.addEventListener('dragover', e=>{e.preventDefault(); dropzone.classList.add('drag');});
+dropzone.addEventListener('dragleave', ()=>dropzone.classList.remove('drag'));
+dropzone.addEventListener('drop', e=>{
+  e.preventDefault();
+  dropzone.classList.remove('drag');
+  handleFiles(e.dataTransfer.files);
+});
+fileInput.addEventListener('change', e=>handleFiles(e.target.files));
+
+async function handleFiles(fileListObj){
+  const files = Array.from(fileListObj);
+  for (const f of files){
+    const entry = { name: f.name, status: 'در حال پردازش…', error: null };
+    loadedFiles.push(entry);
+    renderFileList();
+    try {
+      const ext = f.name.split('.').pop().toLowerCase();
+      let extracted = [];
+      if (ext === 'kml'){
+        const text = await f.text();
+        extracted = parseKMLText(text, f.name);
+      } else if (ext === 'kmz'){
+        extracted = await parseKMZFile(f);
+      } else if (ext === 'dxf'){
+        const text = await f.text();
+        extracted = parseDXFText(text, f.name);
+      } else {
+        throw new Error('پسوند پشتیبانی نمی‌شود');
+      }
+      features.push(...extracted);
+      entry.status = `${extracted.length} موضوع استخراج شد`;
+    } catch(err){
+      entry.status = 'خطا';
+      entry.error = err.message || String(err);
+    }
+    renderFileList();
+  }
+  updateSummary();
+  fileInput.value = "";
+}
+
+function renderFileList(){
+  const ul = document.getElementById('fileList');
+  ul.innerHTML = "";
+  loadedFiles.forEach((f, idx)=>{
+    const li = document.createElement('li');
+    const ok = !f.error;
+    li.innerHTML = `
+      <span>${f.name}</span>
+      <span class="status ${ok?'ok':'err'}">${f.error ? f.error : f.status}</span>
+      <button title="حذف" data-idx="${idx}">✕</button>
+    `;
+    li.querySelector('button').addEventListener('click', ()=>{
+      features = features.filter(feat => feat.source !== f.name);
+      loadedFiles.splice(idx,1);
+      renderFileList();
+      updateSummary();
+    });
+    ul.appendChild(li);
+  });
+}
+
+function updateSummary(){
+  const pointCount = features.reduce((s,f)=>s + f.points.length, 0);
+  document.getElementById('summary').textContent =
+    features.length
+      ? `${features.length} موضوع  ·  ${pointCount} رأس  ·  از ${loadedFiles.filter(f=>!f.error).length} فایل`
+      : 'هیچ موضوعی هنوز استخراج نشده است.';
+  document.getElementById('generateBtn').disabled = features.length === 0;
+}
+
+// ---------------------------------------------------------------------
+// KML parsing
+// ---------------------------------------------------------------------
+function parseCoordText(text){
+  return text.trim().split(/\s+/).filter(Boolean).map(tok=>{
+    const parts = tok.split(',');
+    return {
+      x: parseFloat(parts[0]),
+      y: parseFloat(parts[1]),
+      z: parts[2] !== undefined ? parseFloat(parts[2]) : undefined
+    };
+  }).filter(p => !isNaN(p.x) && !isNaN(p.y));
+}
+
+function walkGeometry(node, cb){
+  for (const child of Array.from(node.children || [])){
+    const tag = child.tagName;
+    if (tag === 'Polygon' || tag === 'LineString' || tag === 'Point'){
+      cb(child, tag);
+    } else if (tag === 'MultiGeometry'){
+      walkGeometry(child, cb);
+    }
+  }
+}
+
+function parseKMLText(text, sourceName){
+  const xml = new DOMParser().parseFromString(text, 'text/xml');
+  if (xml.getElementsByTagName('parsererror').length){
+    throw new Error('فایل KML نامعتبر است');
+  }
+  const out = [];
+  const placemarks = Array.from(xml.getElementsByTagName('Placemark'));
+  let counter = 0;
+  for (const pm of placemarks){
+    counter++;
+    const nameEl = pm.getElementsByTagName('name')[0];
+    const baseName = nameEl ? nameEl.textContent.trim() : `Feature_${counter}`;
+    const geoms = [];
+    walkGeometry(pm, (el, tag)=>geoms.push({el, tag}));
+    let gi = 0;
+    for (const {el, tag} of geoms){
+      gi++;
+      const id = geoms.length > 1 ? `${baseName}_${gi}` : baseName;
+      if (tag === 'Polygon'){
+        const outer = el.getElementsByTagName('outerBoundaryIs')[0];
+        const coordsEl = outer ? outer.getElementsByTagName('coordinates')[0] : null;
+        const pts = coordsEl ? parseCoordText(coordsEl.textContent) : [];
+        if (pts.length) out.push({ id, name: baseName, type: 'Polygon', source: sourceName, points: pts });
+        const inners = Array.from(el.getElementsByTagName('innerBoundaryIs'));
+        inners.forEach((inner, hIdx)=>{
+          const ic = inner.getElementsByTagName('coordinates')[0];
+          if (ic){
+            const ipts = parseCoordText(ic.textContent);
+            if (ipts.length) out.push({ id: `${id}_hole${hIdx+1}`, name: baseName, type: 'Polygon(hole)', source: sourceName, points: ipts });
+          }
+        });
+      } else if (tag === 'LineString'){
+        const coordsEl = el.getElementsByTagName('coordinates')[0];
+        const pts = coordsEl ? parseCoordText(coordsEl.textContent) : [];
+        if (pts.length) out.push({ id, name: baseName, type: 'LineString', source: sourceName, points: pts });
+      } else if (tag === 'Point'){
+        const coordsEl = el.getElementsByTagName('coordinates')[0];
+        const pts = coordsEl ? parseCoordText(coordsEl.textContent) : [];
+        if (pts.length) out.push({ id, name: baseName, type: 'Point', source: sourceName, points: pts });
+      }
+    }
+  }
+  return out;
+}
+
+async function parseKMZFile(file){
+  const zip = await JSZip.loadAsync(file);
+  const kmlEntry = Object.values(zip.files).find(f => !f.dir && f.name.toLowerCase().endsWith('.kml'));
+  if (!kmlEntry) throw new Error('هیچ فایل KML داخل KMZ یافت نشد');
+  const text = await kmlEntry.async('string');
+  return parseKMLText(text, file.name);
+}
+
+// ---------------------------------------------------------------------
+// DXF parsing (LWPOLYLINE, POLYLINE+VERTEX, LINE)
+// ---------------------------------------------------------------------
+function tokenizeDXF(text){
+  const lines = text.split(/\r\n|\r|\n/);
+  const tokens = [];
+  for (let i = 0; i + 1 < lines.length; i += 2){
+    const code = parseInt(lines[i].trim(), 10);
+    const value = lines[i+1] !== undefined ? lines[i+1].trim() : '';
+    if (!isNaN(code)) tokens.push({ code, value });
+  }
+  return tokens;
+}
+
+function parseDXFText(text, sourceName){
+  const tokens = tokenizeDXF(text);
+  const out = [];
+  let i = 0;
+  // find ENTITIES section
+  while (i < tokens.length){
+    if (tokens[i].code === 2 && tokens[i].value === 'ENTITIES'){ i++; break; }
+    i++;
+  }
+  let counter = 0;
+  while (i < tokens.length){
+    const t = tokens[i];
+    if (t.code !== 0){ i++; continue; }
+    const entType = t.value;
+    if (entType === 'ENDSEC' || entType === 'EOF') break;
+
+    if (entType === 'LWPOLYLINE'){
+      i++;
+      let layer = '', handle = '', closed = false, pts = [], curX = null;
+      while (i < tokens.length && tokens[i].code !== 0){
+        const { code, value } = tokens[i];
+        if (code === 8) layer = value;
+        else if (code === 5) handle = value;
+        else if (code === 70) closed = (parseInt(value,10) & 1) === 1;
+        else if (code === 10) curX = parseFloat(value);
+        else if (code === 20 && curX !== null){ pts.push({ x: curX, y: parseFloat(value) }); curX = null; }
+        i++;
+      }
+      counter++;
+      if (pts.length){
+        if (closed && (pts[0].x !== pts[pts.length-1].x || pts[0].y !== pts[pts.length-1].y)){
+          pts.push({ x: pts[0].x, y: pts[0].y });
+        }
+        out.push({ id: handle || `LWPOLY_${counter}`, name: layer || `LWPOLYLINE_${counter}`, type: closed ? 'Polygon' : 'LineString', source: sourceName, points: pts });
+      }
+      continue;
+    }
+
+    if (entType === 'POLYLINE'){
+      i++;
+      let layer = '', handle = '', closed = false;
+      while (i < tokens.length && tokens[i].code !== 0){
+        const { code, value } = tokens[i];
+        if (code === 8) layer = value;
+        else if (code === 5) handle = value;
+        else if (code === 70) closed = (parseInt(value,10) & 1) === 1;
+        i++;
+      }
+      const pts = [];
+      while (i < tokens.length && tokens[i].code === 0 && tokens[i].value === 'VERTEX'){
+        i++;
+        let vx = null, vy = null;
+        while (i < tokens.length && tokens[i].code !== 0){
+          const { code, value } = tokens[i];
+          if (code === 10) vx = parseFloat(value);
+          else if (code === 20) vy = parseFloat(value);
+          i++;
+        }
+        if (vx !== null && vy !== null) pts.push({ x: vx, y: vy });
+      }
+      if (i < tokens.length && tokens[i].code === 0 && tokens[i].value === 'SEQEND') i++;
+      counter++;
+      if (pts.length){
+        if (closed && (pts[0].x !== pts[pts.length-1].x || pts[0].y !== pts[pts.length-1].y)){
+          pts.push({ x: pts[0].x, y: pts[0].y });
+        }
+        out.push({ id: handle || `POLY_${counter}`, name: layer || `POLYLINE_${counter}`, type: closed ? 'Polygon' : 'LineString', source: sourceName, points: pts });
+      }
+      continue;
+    }
+
+    if (entType === 'LINE'){
+      i++;
+      let layer = '', handle = '', x1=null,y1=null,x2=null,y2=null;
+      while (i < tokens.length && tokens[i].code !== 0){
+        const { code, value } = tokens[i];
+        if (code === 8) layer = value;
+        else if (code === 5) handle = value;
+        else if (code === 10) x1 = parseFloat(value);
+        else if (code === 20) y1 = parseFloat(value);
+        else if (code === 11) x2 = parseFloat(value);
+        else if (code === 21) y2 = parseFloat(value);
+        i++;
+      }
+      counter++;
+      if ([x1,y1,x2,y2].every(v => v !== null && !isNaN(v))){
+        out.push({ id: handle || `LINE_${counter}`, name: layer || `LINE_${counter}`, type: 'LineString', source: sourceName, points: [{x:x1,y:y1},{x:x2,y:y2}] });
+      }
+      continue;
+    }
+
+    // unknown entity: skip its group codes
+    i++;
+    while (i < tokens.length && tokens[i].code !== 0) i++;
+  }
+
+  if (!out.length){
+    throw new Error('هیچ LWPOLYLINE / POLYLINE / LINE در بخش ENTITIES یافت نشد');
+  }
+  return out;
+}
+
+// ---------------------------------------------------------------------
+// Output generation
+// ---------------------------------------------------------------------
+function formatNumber(n, precision, decSep){
+  if (n === undefined || n === null || isNaN(n)) return '';
+  let s = n.toFixed(precision);
+  if (decSep === ',') s = s.replace('.', ',');
+  return s;
+}
+
+function crsDef(kind, zone, hemi){
+  if (kind === 'wgs84') return 'WGS84';
+  if (kind === 'utm') return `+proj=utm +zone=${zone}${hemi === 'S' ? ' +south' : ''} +datum=WGS84 +units=m +no_defs`;
+  return 'WGS84';
+}
+
+function applyTemplate(tpl, rowMap){
+  return tpl.replace(/\{(\w+)\}/g, (match, key)=>{
+    const k = key.toLowerCase();
+    return rowMap.hasOwnProperty(k) ? String(rowMap[k]) : match;
+  });
+}
+
+function buildOutput(){
+  const delimSel = document.getElementById('delimiter').value;
+  const delim = delimSel === '__custom__'
+    ? (document.getElementById('delimiterCustom').value || ',')
+    : delimSel;
+  const decSep = document.getElementById('decimalSep').value;
+  const precision = parseInt(document.getElementById('precision').value, 10) || 0;
+  const lineEnding = document.getElementById('lineEnding').value === '\\r\\n' ? '\r\n' : '\n';
+  const withHeader = document.getElementById('header').checked;
+  const swapXY = document.getElementById('swapXY').checked;
+  const quoteText = document.getElementById('quoteText').checked;
+  const closeRing = document.getElementById('closeRing').checked;
+  outputExt = document.getElementById('ext').value;
+
+  const activeCols = columnOrder.filter(k => columnChecked[k]);
+
+  // auto sequential ID setup
+  const autoIdEnabled = document.getElementById('autoIdEnabled').checked;
+  const autoIdStart = parseInt(document.getElementById('autoIdStart').value, 10) || 0;
+  const autoIdStep = parseInt(document.getElementById('autoIdStep').value, 10) || 1;
+  const autoIdPad = parseInt(document.getElementById('autoIdPad').value, 10) || 0;
+  const autoIdPrefix = document.getElementById('autoIdPrefix').value || '';
+  const makeAutoId = (idx)=>{
+    const n = autoIdStart + idx * autoIdStep;
+    const padded = autoIdPad > 0 ? String(n).padStart(autoIdPad, '0') : String(n);
+    return autoIdPrefix + padded;
+  };
+
+  // coordinate conversion setup
+  const convertEnabled = document.getElementById('convertEnabled').checked;
+  let fromDef = null, toDef = null;
+  if (convertEnabled){
+    const fromKind = document.getElementById('fromKind').value;
+    const toKind = document.getElementById('toKind').value;
+    fromDef = crsDef(fromKind, document.getElementById('fromZone').value, document.getElementById('fromHemi').value);
+    toDef = crsDef(toKind, document.getElementById('toZone').value, document.getElementById('toHemi').value);
+  }
+
+  // template mode setup
+  const templateEnabled = document.getElementById('templateEnabled').checked;
+  const templateText = document.getElementById('templateText').value;
+  const blankLineBetween = document.getElementById('blankLineBetween').checked;
+
+  const rows = [];
+  if (!templateEnabled && withHeader) rows.push(activeCols.join(delim));
+
+  const q = (s) => quoteText ? `"${String(s).replace(/"/g,'""')}"` : String(s);
+
+  features.forEach((feat, featIdx)=>{
+    let pts = feat.points;
+    if (closeRing && feat.type === 'Polygon' && pts.length > 1){
+      const first = pts[0], last = pts[pts.length-1];
+      if (first.x !== last.x || first.y !== last.y) pts = [...pts, first];
+    }
+    const idValue = autoIdEnabled ? makeAutoId(featIdx) : feat.id;
+
+    pts.forEach((p, idx)=>{
+      let xVal = p.x, yVal = p.y;
+      if (convertEnabled){
+        try {
+          const [tx, ty] = proj4(fromDef, toDef, [xVal, yVal]);
+          xVal = tx; yVal = ty;
+        } catch(e){ /* leave raw values if conversion fails for this point */ }
+      }
+      if (swapXY){ const tmp = xVal; xVal = yVal; yVal = tmp; }
+
+      const rowMap = {
+        id: templateEnabled ? idValue : q(idValue),
+        pointindex: idx + 1,
+        pointIndex: idx + 1,
+        x: formatNumber(xVal, precision, decSep),
+        y: formatNumber(yVal, precision, decSep),
+        z: p.z !== undefined ? formatNumber(p.z, precision, decSep) : '',
+        name: templateEnabled ? feat.name : q(feat.name),
+        type: templateEnabled ? feat.type : q(feat.type),
+        source: templateEnabled ? feat.source : q(feat.source)
+      };
+
+      if (templateEnabled){
+        rows.push(applyTemplate(templateText, rowMap));
+      } else {
+        rows.push(activeCols.map(c => rowMap[c]).join(delim));
+      }
+    });
+
+    if (templateEnabled && blankLineBetween && featIdx < features.length - 1){
+      rows.push('');
+    }
+  });
+
+  return rows.join(lineEnding);
+}
+
+document.getElementById('generateBtn').addEventListener('click', ()=>{
+  outputText = buildOutput();
+  const preview = outputText.split(/\r\n|\n/).slice(0,40).join('\n');
+  document.getElementById('preview').textContent = preview || '(خروجی خالی است)';
+  document.getElementById('downloadBtn').style.display = 'inline-block';
+});
+
+document.getElementById('downloadBtn').addEventListener('click', ()=>{
+  const blob = new Blob([outputText], { type: 'text/plain;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `coordinates.${outputExt}`;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+});
+</script>
+</body>
+</html>
