@@ -1,0 +1,1063 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl" id="htmlRoot">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title id="pageTitle">مبدل KML/KMZ به DXF آنلاین و رایگان | KML/KMZ to DXF Converter</title>
+<meta id="metaDescription" name="description" content="مبدل رایگان و آنلاین فایل‌های KML و KMZ گوگل‌ارث به فرمت DXF برای AutoCAD، LibreCAD و QGIS. تبدیل کاملاً در مرورگر شما انجام می‌شود، بدون آپلود فایل روی سرور.">
+<meta name="keywords" content="KML to DXF, KMZ to DXF, تبدیل KML به DXF, تبدیل KMZ به DXF, مبدل نقشه, Google Earth to AutoCAD, DXF converter, GIS to CAD">
+<meta name="robots" content="index, follow">
+<meta name="author" content="KML/KMZ to DXF Converter">
+<meta name="theme-color" content="#0E1F2E">
+<!-- در صورت انتشار روی GitHub Pages، آدرس واقعی سایت خود را در دو خط زیر جایگزین کنید -->
+<link id="canonicalLink" rel="canonical" href="https://your-username.github.io/dxf-to-kml/Kml2dxf/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="KML/KMZ to DXF Converter">
+<meta id="ogTitle" property="og:title" content="مبدل آنلاین KML/KMZ به DXF">
+<meta id="ogDescription" property="og:description" content="فایل‌های KML و KMZ گوگل‌ارث را به‌صورت رایگان و آنلاین، مستقیماً در مرورگر، به DXF تبدیل کنید.">
+<meta property="og:url" content="https://your-username.github.io/dxf-to-kml/Kml2dxf/">
+<meta property="og:locale" content="fa_IR">
+<meta property="og:locale:alternate" content="en_US">
+<meta name="twitter:card" content="summary_large_image">
+<meta id="twTitle" name="twitter:title" content="مبدل آنلاین KML/KMZ به DXF">
+<meta id="twDescription" name="twitter:description" content="فایل‌های KML و KMZ گوگل‌ارث را به‌صورت رایگان و آنلاین، مستقیماً در مرورگر، به DXF تبدیل کنید.">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="manifest" href="site.webmanifest">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": "KML/KMZ to DXF Converter",
+  "alternateName": "مبدل KML/KMZ به DXF",
+  "url": "https://your-username.github.io/dxf-to-kml/Kml2dxf/",
+  "applicationCategory": "UtilitiesApplication",
+  "operatingSystem": "Any (runs in web browser)",
+  "description": "ابزار آنلاین و رایگان برای تبدیل فایل‌های KML و KMZ گوگل‌ارث به فرمت DXF سازگار با AutoCAD، LibreCAD و QGIS. کاملاً سمت کلاینت و بدون نیاز به سرور.",
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "USD"
+  },
+  "inLanguage": ["fa", "en"],
+  "browserRequirements": "Requires JavaScript"
+}
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<!-- Yektanet Ad Network -->
+<script>            !function(e,t,n){e.yektanetAnalyticsObject=n,e[n]=e[n]||function(){e[n].q.push(arguments)},e[n].q=e[n].q||[];var a=t.getElementsByTagName("head")[0],r=new Date,c="https://cdn.yektanet.com/superscript/YIuDlHZU/native-esiesi872.github.io-47339/yn_pub.js?v="+r.getFullYear().toString()+"0"+r.getMonth()+"0"+r.getDate()+"0"+r.getHours(),s=t.createElement("link");s.rel="preload",s.as="script",s.href=c,a.appendChild(s);var l=t.createElement("script");l.async=!0,l.src=c,a.appendChild(l)}(window,document,"yektanet");
+</script>
+<style>
+  :root{
+    --bg:#0E1F2E;
+    --bg2:#132A3D;
+    --grid:#1D3B54;
+    --paper:#EDE7D8;
+    --paper2:#E3DCC8;
+    --ink:#14202A;
+    --ink-soft:#4A5A64;
+    --accent:#E8A23D;
+    --accent2:#49B6A8;
+    --danger:#D9736A;
+    --line:#33546F;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:
+      linear-gradient(var(--grid) 1px, transparent 1px) 0 0/40px 40px,
+      linear-gradient(90deg, var(--grid) 1px, transparent 1px) 0 0/40px 40px,
+      var(--bg);
+    color:var(--paper);
+    font-family:'IBM Plex Sans Arabic','IBM Plex Sans', sans-serif;
+    min-height:100vh;
+  }
+  html[dir="ltr"] body{ font-family:'IBM Plex Sans','IBM Plex Sans Arabic', sans-serif; }
+  .mono{font-family:'Space Mono', monospace; letter-spacing:0.02em;}
+
+  .top-toolbar{
+    position:fixed; top:14px; left:14px; z-index:30;
+    display:flex; gap:8px; flex-wrap:wrap;
+  }
+  .lang-toggle, .toolbar-btn{
+    background:var(--ink); color:var(--paper);
+    border:1px solid var(--line); border-radius:3px;
+    font-family:'Space Mono',monospace; font-size:12px;
+    padding:9px 16px; cursor:pointer;
+    display:flex; align-items:center; gap:6px;
+    text-decoration:none;
+  }
+  .lang-toggle:hover, .toolbar-btn:hover{background:#28404E;}
+  .lang-toggle .dot{width:6px;height:6px;background:var(--accent);border-radius:50%;}
+  @media (max-width:700px){
+    .top-toolbar{ position:static; padding:10px 14px 0; }
+    .tb-main{ padding-inline-start:28px !important; }
+  }
+
+  .modal-overlay{
+    display:none; position:fixed; inset:0; z-index:50;
+    background:rgba(14,31,46,0.75);
+    align-items:center; justify-content:center; padding:20px;
+  }
+  .modal-overlay.show{ display:flex; }
+  .modal-box{
+    background:var(--paper); color:var(--ink);
+    max-width:560px; width:100%; max-height:82vh; overflow-y:auto;
+    border:1px solid var(--line); border-radius:6px;
+  }
+  .modal-head{
+    display:flex; justify-content:space-between; align-items:center;
+    padding:16px 20px; border-bottom:1px solid var(--paper2);
+  }
+  .modal-head h2{ font-size:17px; margin:0; }
+  .modal-close{ background:none; border:none; font-size:20px; cursor:pointer; color:var(--ink); line-height:1; }
+  .modal-body{ padding:18px 20px; font-size:14px; line-height:2; }
+  .modal-body h3{ font-size:14px; margin:16px 0 6px; color:var(--bg2); }
+  .modal-body h3:first-child{ margin-top:0; }
+  .modal-body ol, .modal-body ul{ margin:6px 0; padding-inline-start:20px; }
+  .modal-body a{ color:#a8671b; text-decoration:underline; }
+
+  header.titleblock{
+    display:flex;
+    flex-wrap:wrap;
+    align-items:stretch;
+    border-bottom:2px solid var(--line);
+    background:rgba(14,31,46,0.85);
+    backdrop-filter: blur(2px);
+  }
+  .tb-main{
+    flex:1 1 320px;
+    padding:22px 28px;
+    padding-inline-start:70px;
+  }
+  .tb-main .eyebrow{
+    font-size:12px;
+    color:var(--accent);
+    text-transform:uppercase;
+    letter-spacing:0.18em;
+    margin-bottom:6px;
+  }
+  .tb-main h1{
+    margin:0;
+    font-size:clamp(22px,3.4vw,34px);
+    font-weight:700;
+    font-family:'Space Mono',monospace;
+    color:var(--paper);
+  }
+  .tb-main p{
+    margin:8px 0 0;
+    color:#B9C6CE;
+    font-size:14px;
+    max-width:640px;
+    line-height:1.9;
+  }
+  .tb-fields{
+    display:flex;
+    flex-wrap:wrap;
+  }
+  .tb-field{
+    border-inline-start:1px solid var(--line);
+    padding:14px 18px;
+    min-width:110px;
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+  }
+  .tb-field span.label{
+    font-size:10px;
+    color:#7C8F9B;
+    text-transform:uppercase;
+    letter-spacing:0.12em;
+  }
+  .tb-field span.val{
+    font-family:'Space Mono',monospace;
+    font-size:13px;
+    color:var(--accent2);
+    margin-top:4px;
+  }
+
+  main{
+    max-width:1080px;
+    margin:0 auto;
+    padding:36px 20px 80px;
+  }
+
+  .dropzone{
+    position:relative;
+    border:2px dashed var(--line);
+    border-radius:4px;
+    background:rgba(237,231,216,0.03);
+    padding:46px 24px;
+    text-align:center;
+    transition:border-color .2s, background .2s;
+    cursor:pointer;
+  }
+  .dropzone.drag{
+    border-color:var(--accent);
+    background:rgba(232,162,61,0.07);
+  }
+  .dropzone .dz-icon{
+    font-family:'Space Mono',monospace;
+    font-size:34px;
+    color:var(--accent2);
+    margin-bottom:10px;
+  }
+  .dropzone h3{
+    margin:0 0 6px;
+    font-size:17px;
+    color:var(--paper);
+  }
+  .dropzone p{
+    margin:0;
+    color:#8FA0AB;
+    font-size:13px;
+  }
+  .dropzone input[type=file]{
+    position:absolute; inset:0; opacity:0; cursor:pointer;
+  }
+
+  section.panel{
+    margin-top:28px;
+    background:var(--paper);
+    color:var(--ink);
+    border-radius:4px;
+    padding:22px 24px;
+    box-shadow:0 8px 24px rgba(0,0,0,0.25);
+  }
+  section.panel h2{
+    margin:0 0 4px;
+    font-family:'Space Mono',monospace;
+    font-size:14px;
+    letter-spacing:0.08em;
+    text-transform:uppercase;
+    color:var(--ink);
+    display:flex;
+    align-items:center;
+    gap:8px;
+  }
+  section.panel h2::before{
+    content:"";
+    width:10px;height:10px;
+    background:var(--accent);
+    display:inline-block;
+  }
+  .panel-sub{
+    font-size:12.5px;
+    color:var(--ink-soft);
+    margin:0 0 18px;
+  }
+
+  .ad-slot{
+    margin-top:28px;
+    border:1px dashed var(--line);
+    border-radius:4px;
+    padding:10px;
+    text-align:center;
+    min-height:60px;
+  }
+  .ad-slot .ad-label{
+    font-family:'Space Mono',monospace;
+    font-size:10px;
+    color:#5f7382;
+    text-transform:uppercase;
+    letter-spacing:0.14em;
+    margin-bottom:6px;
+  }
+
+  .file-row{
+    display:flex;
+    gap:16px;
+    align-items:flex-start;
+    padding:14px 0;
+    border-top:1px solid var(--paper2);
+  }
+  .file-row:first-of-type{border-top:none;}
+  .preview-box{
+    flex:0 0 auto;
+    background:var(--bg2);
+    border:1px solid var(--line);
+    border-radius:3px;
+  }
+  .preview-svg{width:150px;height:96px;display:block;}
+  .pv-bg{fill:#0E1F2E;}
+  .pv-grid{stroke:#1D3B54;stroke-width:1;}
+  .pv-pt{fill:#E8A23D;}
+  .pv-line{fill:none;stroke:#49B6A8;stroke-width:1.4;}
+  .pv-poly{fill:rgba(73,182,168,0.18);stroke:#49B6A8;stroke-width:1.2;}
+  .pv-hole{fill:#0E1F2E;stroke:#49B6A8;stroke-width:1;stroke-dasharray:2 2;}
+
+  .file-meta{flex:1;min-width:0;}
+  .file-meta .fname{
+    font-weight:600; font-size:14.5px; word-break:break-all;
+  }
+  .file-meta .fstats{
+    font-family:'Space Mono',monospace;
+    font-size:11.5px;
+    color:var(--ink-soft);
+    margin-top:6px;
+    display:flex; flex-wrap:wrap; gap:12px;
+  }
+  .file-meta .flayers{
+    font-size:11.5px;
+    color:#6b5a2f;
+    margin-top:6px;
+  }
+  .file-meta .ferror{
+    font-size:12.5px; color:#a33; margin-top:6px;
+  }
+  .remove-btn{
+    background:none;border:1px solid var(--ink-soft);
+    color:var(--ink-soft);
+    border-radius:3px;
+    font-family:'Space Mono',monospace;
+    font-size:11px;
+    padding:4px 8px;
+    cursor:pointer;
+    align-self:flex-start;
+  }
+  .remove-btn:hover{border-color:var(--danger); color:var(--danger);}
+
+  .opt-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+    gap:20px;
+  }
+  .opt-group label.title{
+    display:block;
+    font-size:12.5px;
+    font-weight:600;
+    margin-bottom:8px;
+  }
+  .radio-line{
+    display:flex; align-items:flex-start; gap:8px;
+    font-size:13px; margin-bottom:8px; cursor:pointer;
+    line-height:1.6;
+  }
+  .radio-line small{display:block;color:var(--ink-soft);font-size:11.5px;}
+  input[type=radio]{margin-top:3px;}
+  input[type=number], input[type=text]{
+    width:100%;
+    padding:8px 10px;
+    border:1px solid #C9C0A8;
+    border-radius:3px;
+    font-family:'Space Mono',monospace;
+    font-size:13px;
+    background:#fff;
+  }
+
+  .cta-row{
+    margin-top:26px;
+    display:flex;
+    align-items:center;
+    gap:16px;
+    flex-wrap:wrap;
+  }
+  button.primary{
+    background:var(--ink);
+    color:var(--paper);
+    border:none;
+    padding:14px 26px;
+    font-family:'Space Mono',monospace;
+    font-size:14px;
+    letter-spacing:0.04em;
+    border-radius:3px;
+    cursor:pointer;
+    transition:background .15s;
+  }
+  button.primary:hover:not(:disabled){background:#28404E;}
+  button.primary:disabled{opacity:0.4; cursor:not-allowed;}
+  .status-msg{font-size:12.5px; color:var(--ink-soft); font-family:'Space Mono',monospace;}
+  .status-msg.ok{color:#2f7a4f;}
+  .status-msg.err{color:#a33;}
+
+  footer{
+    max-width:1080px;
+    margin:0 auto;
+    padding:10px 20px 60px;
+    color:#7C8F9B;
+    font-size:12px;
+    line-height:1.9;
+  }
+  footer p{margin:0 0 10px;}
+  footer code{color:var(--accent2);}
+
+  @media (max-width:640px){
+    .tb-fields{display:none;}
+    .file-row{flex-direction:column;}
+    .tb-main{padding-inline-start:20px; padding-top:56px;}
+  }
+  :focus-visible{outline:2px solid var(--accent); outline-offset:2px;}
+</style>
+</head>
+<body>
+
+<noscript>
+  <div style="background:#EDE7D8;color:#14202A;padding:16px 20px;text-align:center;font-family:sans-serif;">
+    این ابزار برای تبدیل فایل به کد جاوااسکریپت نیاز دارد؛ لطفاً آن را در مرورگر خود فعال کنید. /
+    This tool requires JavaScript to convert files; please enable it in your browser.
+  </div>
+</noscript>
+
+<div class="top-toolbar">
+  <a class="toolbar-btn" id="homeBtn" href="../index.html" data-i18n="homeBtn">بازگشت به فرم اصلی</a>
+  <button class="toolbar-btn" id="helpBtn" type="button" data-i18n="helpBtn">راهنما</button>
+  <button class="lang-toggle" id="langToggle" aria-label="Toggle language"><span class="dot"></span><span id="langToggleLabel">EN</span></button>
+</div>
+
+<header class="titleblock">
+  <div class="tb-main">
+    <div class="eyebrow" data-i18n="eyebrow"></div>
+    <h1 data-i18n="title"></h1>
+    <p data-i18n="subtitle"></p>
+  </div>
+  <div class="tb-fields">
+    <div class="tb-field"><span class="label" data-i18n="tbFormatIn"></span><span class="val">KML / KMZ</span></div>
+    <div class="tb-field"><span class="label" data-i18n="tbFormatOut"></span><span class="val">DXF R12</span></div>
+    <div class="tb-field"><span class="label" data-i18n="tbEngine"></span><span class="val" data-i18n="tbEngineVal"></span></div>
+  </div>
+</header>
+
+<main>
+
+  <div class="dropzone" id="dropzone">
+    <div class="dz-icon">⌖</div>
+    <h3 data-i18n="dzTitle"></h3>
+    <p data-i18n="dzSub"></p>
+    <input type="file" id="fileInput" accept=".kml,.kmz" multiple>
+  </div>
+
+  <div class="ad-slot" id="adSlotTop"><div class="ad-label" data-i18n="adLabel"></div></div>
+
+  <section class="panel" id="filesPanel" style="display:none;">
+    <h2 data-i18n="filesH2"></h2>
+    <p class="panel-sub" data-i18n="filesSub"></p>
+    <div id="fileList"></div>
+  </section>
+
+  <section class="panel" id="optionsPanel" style="display:none;">
+    <h2 data-i18n="optH2"></h2>
+    <p class="panel-sub" data-i18n="optSub"></p>
+    <div class="opt-grid">
+      <div class="opt-group">
+        <label class="title" data-i18n="coordTitle"></label>
+        <label class="radio-line">
+          <input type="radio" name="coordMode" value="local" checked>
+          <span><span data-i18n="coordLocal"></span><br><small data-i18n="coordLocalDesc"></small></span>
+        </label>
+        <label class="radio-line">
+          <input type="radio" name="coordMode" value="raw">
+          <span><span data-i18n="coordRaw"></span><br><small data-i18n="coordRawDesc"></small></span>
+        </label>
+      </div>
+      <div class="opt-group">
+        <label class="title" data-i18n="precTitle"></label>
+        <input type="number" id="precisionInput" value="3" min="0" max="8" step="1">
+      </div>
+      <div class="opt-group">
+        <label class="title" data-i18n="outTitle"></label>
+        <label class="radio-line">
+          <input type="radio" name="outMode" value="merged" checked>
+          <span><span data-i18n="outMerged"></span><br><small data-i18n="outMergedDesc"></small></span>
+        </label>
+        <label class="radio-line">
+          <input type="radio" name="outMode" value="separate">
+          <span data-i18n="outSeparate"></span>
+        </label>
+      </div>
+    </div>
+
+    <div class="cta-row">
+      <button class="primary" id="convertBtn" disabled data-i18n="convertBtn"></button>
+      <span class="status-msg" id="statusMsg"></span>
+    </div>
+  </section>
+
+  <div class="ad-slot" id="adSlotBottom"><div class="ad-label" data-i18n="adLabel"></div></div>
+
+</main>
+
+<footer>
+  <p data-i18n="footer1"></p>
+  <p data-i18n="footer2"></p>
+</footer>
+
+<div class="modal-overlay" id="helpOverlay">
+  <div class="modal-box">
+    <div class="modal-head">
+      <h2 data-i18n="helpTitle">راهنمای استفاده</h2>
+      <button class="modal-close" data-close="helpOverlay">&times;</button>
+    </div>
+    <div class="modal-body" id="helpBody" data-i18n-html="helpBody"></div>
+  </div>
+</div>
+
+<script>
+(function(){
+  // ---------- i18n ----------
+  const translations = {
+    fa: {
+      eyebrow: 'ابزار سمت کلاینت — بدون سرور',
+      title: 'KML / KMZ → DXF',
+      subtitle: 'فایل‌های نقشه گوگل‌ارث (KML/KMZ) را وارد کنید تا به فرمت نقشه‌کشی DXF (سازگار با AutoCAD، LibreCAD، QGIS و ...) تبدیل شوند. تمام پردازش داخل مرورگر شما انجام می‌شود؛ هیچ فایلی به سروری ارسال نمی‌گردد.',
+      tbFormatIn: 'ورودی', tbFormatOut: 'خروجی', tbEngine: 'موتور پردازش', tbEngineVal: 'مرورگر (JS)',
+      dzTitle: 'فایل‌ها را اینجا رها کنید یا کلیک کنید',
+      dzSub: 'پسوندهای مجاز: .kml و .kmz — امکان انتخاب چند فایل هم‌زمان وجود دارد',
+      adLabel: 'تبلیغات',
+      filesH2: 'فایل‌های بارگذاری‌شده',
+      filesSub: 'پیش‌نمایش هندسه استخراج‌شده از هر فایل — نقاط (زرد)، خطوط و چندضلعی‌ها (سبز)',
+      optH2: 'تنظیمات تبدیل',
+      optSub: 'این تنظیمات نحوهٔ نگاشت مختصات جغرافیایی به مختصات DXF را مشخص می‌کنند.',
+      coordTitle: 'سیستم مختصات خروجی',
+      coordLocal: 'متر تقریبی (محلی)',
+      coordLocalDesc: 'مناسب برای کار در نرم‌افزار CAD — مبدأ در مرکز داده‌ها قرار می‌گیرد.',
+      coordRaw: 'درجه جغرافیایی خام (Lon/Lat)',
+      coordRawDesc: 'بدون تبدیل؛ برای استفاده در ابزارهای GIS.',
+      precTitle: 'دقت اعشار',
+      outTitle: 'حالت خروجی',
+      outMerged: 'یک فایل DXF ادغام‌شده',
+      outMergedDesc: 'هر فایل ورودی به‌صورت لایهٔ جداگانه.',
+      outSeparate: 'فایل DXF جدا برای هر ورودی (ZIP)',
+      convertBtn: 'تبدیل و دانلود DXF',
+      statusConverting: 'در حال تبدیل...',
+      statusOk: '✓ فایل با موفقیت ساخته و دانلود شد',
+      statusErr: '✗ خطا: ',
+      removeBtn: 'حذف',
+      processing: 'در حال پردازش...',
+      statPt: 'نقطه', statLine: 'خط', statPoly: 'چندضلعی', statLayer: 'لایه',
+      footer1: 'این ابزار کاملاً در مرورگر اجرا می‌شود و برای میزبانی روی GitHub Pages مناسب است: کافیست همین فایل را با نام index.html در ریشهٔ مخزن (Repository) خود قرار دهید و از بخش Settings → Pages گزینهٔ انتشار از شاخهٔ main را فعال کنید.',
+      footer2: 'محدودیت‌ها: چندضلعی‌های دارای حفره به‌صورت چند خط‌بستهٔ جدا روی همان لایه رسم می‌شوند (DXF واقعی حفره ندارد)، و ارتفاع (Z) در صورت وجود در KML حفظ می‌شود.',
+      errInvalidKML: 'فایل KML نامعتبر است',
+      errNoGeom: 'هیچ هندسه‌ای (Point/LineString/Polygon) در فایل یافت نشد',
+      errNoKmlInKmz: 'هیچ فایل KML داخل KMZ پیدا نشد',
+      errUnsupported: 'پسوند فایل پشتیبانی نمی‌شود',
+      toggleLabel: 'EN',
+      homeBtn: 'بازگشت به فرم اصلی',
+      helpBtn: 'راهنما',
+      helpTitle: 'راهنمای استفاده',
+      helpBody: `
+        <h3>۱. فایل‌ها را بارگذاری کنید</h3>
+        <p>یک یا چند فایل KML یا KMZ را در کادر مشخص‌شده رها کنید یا با کلیک انتخاب کنید.</p>
+        <h3>۲. سیستم مختصات خروجی را انتخاب کنید</h3>
+        <p>«متر تقریبی (محلی)» برای کار در نرم‌افزار CAD مناسب‌تر است (مبدأ در مرکز داده‌ها قرار می‌گیرد)؛ «درجهٔ جغرافیایی خام» بدون تبدیل، برای ابزارهای GIS.</p>
+        <h3>۳. حالت خروجی را مشخص کنید</h3>
+        <p>می‌توانید همهٔ فایل‌ها را در یک DXF ادغام‌شده (هر فایل یک لایه) بگیرید، یا برای هر فایل ورودی یک DXF جدا در قالب ZIP دریافت کنید.</p>
+        <h3>۴. تبدیل و دانلود</h3>
+        <p>با کلیک روی «تبدیل و دانلود DXF»، خروجی ساخته و دانلود می‌شود.</p>
+        <h3>محدودیت‌ها</h3>
+        <p>چندضلعی‌های دارای حفره به‌صورت چند خط‌بستهٔ جدا روی همان لایه رسم می‌شوند (DXF واقعی حفره ندارد). ارتفاع (Z) در صورت وجود در KML حفظ می‌شود.</p>
+      `,
+      metaTitle: 'مبدل KML/KMZ به DXF آنلاین و رایگان | KML/KMZ to DXF Converter',
+      metaDescription: 'مبدل رایگان و آنلاین فایل‌های KML و KMZ گوگل‌ارث به فرمت DXF برای AutoCAD، LibreCAD و QGIS. تبدیل کاملاً در مرورگر شما انجام می‌شود، بدون آپلود فایل روی سرور.',
+      ogTitle: 'مبدل آنلاین KML/KMZ به DXF',
+      ogDescription: 'فایل‌های KML و KMZ گوگل‌ارث را به‌صورت رایگان و آنلاین، مستقیماً در مرورگر، به DXF تبدیل کنید.'
+    },
+    en: {
+      eyebrow: 'Client-side tool — no server required',
+      title: 'KML / KMZ → DXF',
+      subtitle: 'Upload Google Earth map files (KML/KMZ) to convert them into the DXF drafting format (compatible with AutoCAD, LibreCAD, QGIS, etc). Everything runs in your browser — no files are ever uploaded to a server.',
+      tbFormatIn: 'Format In', tbFormatOut: 'Format Out', tbEngine: 'Engine', tbEngineVal: 'Browser JS',
+      dzTitle: 'Drop files here or click to browse',
+      dzSub: 'Allowed extensions: .kml and .kmz — multiple files can be selected at once',
+      adLabel: 'Advertisement',
+      filesH2: 'Loaded files',
+      filesSub: 'Preview of geometry extracted from each file — points (yellow), lines & polygons (green)',
+      optH2: 'Conversion settings',
+      optSub: 'These options control how geographic coordinates are mapped to DXF coordinates.',
+      coordTitle: 'Output coordinate system',
+      coordLocal: 'Approximate local meters',
+      coordLocalDesc: 'Best for CAD software — origin is placed at the center of the data.',
+      coordRaw: 'Raw geographic degrees (Lon/Lat)',
+      coordRawDesc: 'No conversion; useful for GIS tools.',
+      precTitle: 'Decimal precision',
+      outTitle: 'Output mode',
+      outMerged: 'One merged DXF file',
+      outMergedDesc: 'Each input file becomes a separate layer.',
+      outSeparate: 'Separate DXF per input (ZIP)',
+      convertBtn: 'Convert & Download DXF',
+      statusConverting: 'Converting...',
+      statusOk: '✓ File created and downloaded successfully',
+      statusErr: '✗ Error: ',
+      removeBtn: 'Remove',
+      processing: 'Processing...',
+      statPt: 'Points', statLine: 'Lines', statPoly: 'Polygons', statLayer: 'Layers',
+      footer1: 'This tool runs entirely in the browser and is perfect for hosting on GitHub Pages: just place this file as index.html at the root of your repository, then enable Settings → Pages → Deploy from the main branch.',
+      footer2: 'Limitations: polygons with holes are drawn as separate closed polylines on the same layer (DXF has no native hole support), and elevation (Z) is preserved when present in the KML.',
+      errInvalidKML: 'Invalid KML file',
+      errNoGeom: 'No geometry (Point/LineString/Polygon) found in file',
+      errNoKmlInKmz: 'No KML file found inside the KMZ',
+      errUnsupported: 'Unsupported file extension',
+      toggleLabel: 'فا',
+      homeBtn: 'Back to main form',
+      helpBtn: 'Help',
+      helpTitle: 'How to use',
+      helpBody: `
+        <h3>1. Load your files</h3>
+        <p>Drop one or more KML or KMZ files into the marked area, or click to browse.</p>
+        <h3>2. Choose the output coordinate system</h3>
+        <p>"Approximate local meters" works best for CAD software (origin placed at the center of the data); "Raw geographic degrees" applies no conversion, useful for GIS tools.</p>
+        <h3>3. Choose the output mode</h3>
+        <p>You can merge everything into a single DXF (each file becomes a layer), or download a separate DXF per input file as a ZIP.</p>
+        <h3>4. Convert & download</h3>
+        <p>Click "Convert & Download DXF" to generate and download the output.</p>
+        <h3>Limitations</h3>
+        <p>Polygons with holes are drawn as separate closed polylines on the same layer (DXF has no native hole support). Elevation (Z) is preserved when present in the KML.</p>
+      `,
+      metaTitle: 'KML/KMZ to DXF Converter — Free Online Tool | مبدل KML/KMZ به DXF',
+      metaDescription: 'Free online KML/KMZ to DXF converter. Convert Google Earth map files to AutoCAD, LibreCAD, and QGIS-compatible DXF drawings entirely in your browser — no upload required.',
+      ogTitle: 'Free Online KML/KMZ to DXF Converter',
+      ogDescription: 'Convert Google Earth KML/KMZ files to DXF drawings for free, entirely in your browser — no server upload needed.'
+    }
+  };
+
+  let currentLang = 'fa';
+  function t(key){ return (translations[currentLang] && translations[currentLang][key]) || key; }
+
+  function applyLang(){
+    const html = document.getElementById('htmlRoot');
+    html.setAttribute('lang', currentLang);
+    html.setAttribute('dir', currentLang === 'fa' ? 'rtl' : 'ltr');
+    document.querySelectorAll('[data-i18n]').forEach(el=>{
+      el.textContent = t(el.getAttribute('data-i18n'));
+    });
+    document.querySelectorAll('[data-i18n-html]').forEach(el=>{
+      el.innerHTML = t(el.getAttribute('data-i18n-html'));
+    });
+    document.getElementById('langToggleLabel').textContent = t('toggleLabel');
+
+    document.getElementById('pageTitle').textContent = t('metaTitle');
+    const metaDesc = document.getElementById('metaDescription');
+    if(metaDesc) metaDesc.setAttribute('content', t('metaDescription'));
+    const ogTitle = document.getElementById('ogTitle');
+    if(ogTitle) ogTitle.setAttribute('content', t('ogTitle'));
+    const ogDesc = document.getElementById('ogDescription');
+    if(ogDesc) ogDesc.setAttribute('content', t('ogDescription'));
+    const twTitle = document.getElementById('twTitle');
+    if(twTitle) twTitle.setAttribute('content', t('ogTitle'));
+    const twDesc = document.getElementById('twDescription');
+    if(twDesc) twDesc.setAttribute('content', t('ogDescription'));
+
+    renderFileList();
+  }
+
+  document.getElementById('langToggle').addEventListener('click', ()=>{
+    currentLang = currentLang === 'fa' ? 'en' : 'fa';
+    applyLang();
+  });
+
+  // ---------- Help modal ----------
+  function openModal(id){ document.getElementById(id).classList.add('show'); }
+  function closeModal(id){ document.getElementById(id).classList.remove('show'); }
+  document.getElementById('helpBtn').addEventListener('click', ()=> openModal('helpOverlay'));
+  document.querySelectorAll('.modal-close').forEach(btn=>{
+    btn.addEventListener('click', ()=> closeModal(btn.getAttribute('data-close')));
+  });
+  document.querySelectorAll('.modal-overlay').forEach(overlay=>{
+    overlay.addEventListener('click', e=>{ if (e.target === overlay) closeModal(overlay.id); });
+  });
+  document.addEventListener('keydown', e=>{
+    if (e.key === 'Escape'){
+      document.querySelectorAll('.modal-overlay.show').forEach(o=> closeModal(o.id));
+    }
+  });
+
+  // ---------- Drag & drop / elements ----------
+  const dropzone = document.getElementById('dropzone');
+  const fileInput = document.getElementById('fileInput');
+  const filesPanel = document.getElementById('filesPanel');
+  const fileList = document.getElementById('fileList');
+  const optionsPanel = document.getElementById('optionsPanel');
+  const convertBtn = document.getElementById('convertBtn');
+  const statusMsg = document.getElementById('statusMsg');
+  const precisionInput = document.getElementById('precisionInput');
+
+  let loadedFiles = []; // {id, name, baseName, geoms, bbox, errorKey}
+  let idSeq = 1;
+
+  ['dragenter','dragover'].forEach(ev=>{
+    dropzone.addEventListener(ev, e=>{ e.preventDefault(); dropzone.classList.add('drag'); });
+  });
+  ['dragleave','drop'].forEach(ev=>{
+    dropzone.addEventListener(ev, e=>{ e.preventDefault(); dropzone.classList.remove('drag'); });
+  });
+  dropzone.addEventListener('drop', e=>{
+    const files = Array.from(e.dataTransfer.files || []);
+    handleFiles(files);
+  });
+  fileInput.addEventListener('change', e=>{
+    handleFiles(Array.from(e.target.files || []));
+    fileInput.value = '';
+  });
+
+  // ---------- KML parsing helpers ----------
+  function parseCoords(text){
+    return text.trim().split(/\s+/).filter(Boolean).map(s=>{
+      const parts = s.split(',').map(Number);
+      return [parts[0]||0, parts[1]||0, parts[2]||0];
+    });
+  }
+
+  function getChildText(el, tag){
+    for(const c of Array.from(el.children||[])){
+      if(c.tagName === tag) return c.textContent;
+    }
+    return null;
+  }
+
+  function getLayerPath(pm){
+    let parts = [];
+    let node = pm.parentElement;
+    while(node){
+      if(node.tagName === 'Folder' || node.tagName === 'Document'){
+        const nm = getChildText(node,'name');
+        if(nm && nm.trim()) parts.unshift(nm.trim());
+      }
+      node = node.parentElement;
+    }
+    return parts.join(' / ');
+  }
+
+  function extractGeometries(pm, layer, geoms){
+    function handle(el){
+      if(!el) return;
+      if(el.tagName === 'Point'){
+        const c = getChildText(el,'coordinates');
+        if(c){ const pts = parseCoords(c); if(pts.length) geoms.push({type:'point', layer, rings:[[pts[0]]]}); }
+      } else if(el.tagName === 'LineString'){
+        const c = getChildText(el,'coordinates');
+        if(c){ const pts = parseCoords(c); if(pts.length>1) geoms.push({type:'line', layer, rings:[pts]}); }
+      } else if(el.tagName === 'Polygon'){
+        const outerC = el.querySelector('outerBoundaryIs > LinearRing > coordinates');
+        const rings = [];
+        if(outerC){ const pts = parseCoords(outerC.textContent); if(pts.length>2) rings.push(pts); }
+        el.querySelectorAll('innerBoundaryIs > LinearRing > coordinates').forEach(ic=>{
+          const pts = parseCoords(ic.textContent);
+          if(pts.length>2) rings.push(pts);
+        });
+        if(rings.length) geoms.push({type:'polygon', layer, rings});
+      } else if(el.tagName === 'MultiGeometry'){
+        Array.from(el.children).forEach(handle);
+      }
+    }
+    Array.from(pm.children).forEach(handle);
+  }
+
+  function parseKMLText(text){
+    const xml = new DOMParser().parseFromString(text, 'text/xml');
+    const errNode = xml.querySelector('parsererror');
+    if(errNode) throw new Error('errInvalidKML');
+    const geoms = [];
+    const placemarks = Array.from(xml.getElementsByTagName('Placemark'));
+    placemarks.forEach(pm=>{
+      const layer = getLayerPath(pm) || 'KML';
+      extractGeometries(pm, layer, geoms);
+    });
+    if(geoms.length === 0) throw new Error('errNoGeom');
+    return geoms;
+  }
+
+  async function readFileAsGeoms(file){
+    const lower = file.name.toLowerCase();
+    if(lower.endsWith('.kmz')){
+      const buf = await file.arrayBuffer();
+      const zip = await JSZip.loadAsync(buf);
+      let entryName = Object.keys(zip.files).find(n=>n.toLowerCase() === 'doc.kml');
+      if(!entryName) entryName = Object.keys(zip.files).find(n=>n.toLowerCase().endsWith('.kml'));
+      if(!entryName) throw new Error('errNoKmlInKmz');
+      const text = await zip.files[entryName].async('string');
+      return parseKMLText(text);
+    } else if(lower.endsWith('.kml')){
+      const text = await file.text();
+      return parseKMLText(text);
+    } else {
+      throw new Error('errUnsupported');
+    }
+  }
+
+  function computeBBox(geoms){
+    let minLon=Infinity, minLat=Infinity, maxLon=-Infinity, maxLat=-Infinity;
+    geoms.forEach(g=>g.rings.forEach(r=>r.forEach(p=>{
+      if(p[0]<minLon) minLon=p[0];
+      if(p[0]>maxLon) maxLon=p[0];
+      if(p[1]<minLat) minLat=p[1];
+      if(p[1]>maxLat) maxLat=p[1];
+    })));
+    if(!isFinite(minLon)){ minLon=minLat=0; maxLon=maxLat=1; }
+    return [minLon,minLat,maxLon,maxLat];
+  }
+
+  function buildPreviewSVG(geoms, bbox){
+    const w=150,h=96,pad=8;
+    const [minLon,minLat,maxLon,maxLat] = bbox;
+    const spanLon = Math.max(maxLon-minLon, 1e-9);
+    const spanLat = Math.max(maxLat-minLat, 1e-9);
+    const scale = Math.min((w-2*pad)/spanLon, (h-2*pad)/spanLat);
+    const offX = pad + ((w-2*pad) - spanLon*scale)/2;
+    const offY = pad + ((h-2*pad) - spanLat*scale)/2;
+    function toXY(p){
+      const x = offX + (p[0]-minLon)*scale;
+      const y = h - (offY + (p[1]-minLat)*scale);
+      return [x,y];
+    }
+    let grid='';
+    for(let gx=0; gx<=w; gx+=15) grid += `<line x1="${gx}" y1="0" x2="${gx}" y2="${h}" class="pv-grid"/>`;
+    for(let gy=0; gy<=h; gy+=15) grid += `<line x1="0" y1="${gy}" x2="${w}" y2="${gy}" class="pv-grid"/>`;
+    let body='';
+    geoms.forEach(g=>{
+      if(g.type==='point'){
+        const [x,y] = toXY(g.rings[0][0]);
+        body += `<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="2" class="pv-pt"/>`;
+      } else {
+        g.rings.forEach((ring, idx)=>{
+          const d = ring.map((p,i)=> (i===0?'M':'L') + toXY(p).map(n=>n.toFixed(1)).join(',')).join(' ');
+          const closed = g.type==='polygon';
+          const cls = g.type==='polygon' ? (idx===0?'pv-poly':'pv-hole') : 'pv-line';
+          body += `<path d="${d}${closed?' Z':''}" class="${cls}"/>`;
+        });
+      }
+    });
+    return `<svg viewBox="0 0 ${w} ${h}" class="preview-svg"><rect width="${w}" height="${h}" class="pv-bg"/>${grid}${body}</svg>`;
+  }
+
+  function countStats(geoms){
+    const layers = new Set();
+    let pts=0, lines=0, polys=0;
+    geoms.forEach(g=>{
+      layers.add(g.layer);
+      if(g.type==='point') pts++;
+      else if(g.type==='line') lines++;
+      else if(g.type==='polygon') polys++;
+    });
+    return {layers: layers.size, pts, lines, polys, layerNames:[...layers]};
+  }
+
+  async function handleFiles(files){
+    const valid = files.filter(f=>/\.(kml|kmz)$/i.test(f.name));
+    if(valid.length===0) return;
+    filesPanel.style.display='block';
+    optionsPanel.style.display='block';
+
+    for(const file of valid){
+      const entry = { id: idSeq++, name: file.name, baseName: file.name.replace(/\.(kml|kmz)$/i,''), geoms: [], bbox:null, errorKey:null };
+      loadedFiles.push(entry);
+      renderFileList();
+      try{
+        const geoms = await readFileAsGeoms(file);
+        entry.geoms = geoms;
+        entry.bbox = computeBBox(geoms);
+      } catch(err){
+        entry.errorKey = err.message || 'errUnsupported';
+      }
+      renderFileList();
+    }
+    updateConvertState();
+  }
+
+  function renderFileList(){
+    fileList.innerHTML = '';
+    loadedFiles.forEach(entry=>{
+      const row = document.createElement('div');
+      row.className = 'file-row';
+
+      const previewBox = document.createElement('div');
+      previewBox.className = 'preview-box';
+      if(entry.geoms && entry.geoms.length){
+        previewBox.innerHTML = buildPreviewSVG(entry.geoms, entry.bbox);
+      } else {
+        previewBox.innerHTML = `<svg viewBox="0 0 150 96" class="preview-svg"><rect width="150" height="96" class="pv-bg"/></svg>`;
+      }
+
+      const meta = document.createElement('div');
+      meta.className = 'file-meta';
+      if(entry.errorKey){
+        meta.innerHTML = `<div class="fname">${escapeHtml(entry.name)}</div><div class="ferror">⚠ ${escapeHtml(t(entry.errorKey))}</div>`;
+      } else if(entry.geoms.length){
+        const st = countStats(entry.geoms);
+        meta.innerHTML = `
+          <div class="fname">${escapeHtml(entry.name)}</div>
+          <div class="fstats">
+            <span>${t('statPt')}: ${st.pts}</span>
+            <span>${t('statLine')}: ${st.lines}</span>
+            <span>${t('statPoly')}: ${st.polys}</span>
+            <span>${t('statLayer')}: ${st.layers}</span>
+          </div>
+          <div class="flayers">${st.layerNames.slice(0,4).map(escapeHtml).join(' · ')}${st.layerNames.length>4?' ...':''}</div>
+        `;
+      } else {
+        meta.innerHTML = `<div class="fname">${escapeHtml(entry.name)}</div><div class="fstats">${t('processing')}</div>`;
+      }
+
+      const removeBtn = document.createElement('button');
+      removeBtn.className = 'remove-btn';
+      removeBtn.textContent = t('removeBtn');
+      removeBtn.onclick = ()=>{
+        loadedFiles = loadedFiles.filter(e=>e.id!==entry.id);
+        renderFileList();
+        updateConvertState();
+        if(loadedFiles.length===0){ filesPanel.style.display='none'; optionsPanel.style.display='none'; }
+      };
+
+      row.appendChild(previewBox);
+      row.appendChild(meta);
+      row.appendChild(removeBtn);
+      fileList.appendChild(row);
+    });
+  }
+
+  function escapeHtml(s){
+    return String(s).replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  }
+
+  function updateConvertState(){
+    const ready = loadedFiles.some(e=>!e.errorKey && e.geoms.length);
+    convertBtn.disabled = !ready;
+  }
+
+  // ---------- DXF generation ----------
+  function sanitizeLayer(name){
+    let n = (name||'KML').toString().trim().replace(/[<>/\\":;?*|,=`]/g,'_').replace(/\s+/g,'_');
+    return n.slice(0,255) || 'KML';
+  }
+
+  function projectGeoms(geoms, mode){
+    if(mode === 'raw'){
+      return geoms.map(g=>({...g, rings: g.rings.map(r=>r.map(p=>[p[0],p[1],p[2]||0]))}));
+    }
+    let sumLon=0,sumLat=0,n=0;
+    geoms.forEach(g=>g.rings.forEach(r=>r.forEach(p=>{ sumLon+=p[0]; sumLat+=p[1]; n++; })));
+    const lon0 = n? sumLon/n : 0;
+    const lat0 = n? sumLat/n : 0;
+    const cosLat = Math.cos(lat0*Math.PI/180);
+    return geoms.map(g=>({...g, rings: g.rings.map(r=>r.map(p=>{
+      const x = (p[0]-lon0) * 111320 * cosLat;
+      const y = (p[1]-lat0) * 110540;
+      return [x, y, p[2]||0];
+    }))}));
+  }
+
+  function buildDXF(fileEntries, mode, precision){
+    let allGeoms = [];
+    const multi = fileEntries.length > 1;
+    fileEntries.forEach(fe=>{
+      fe.geoms.forEach(g=>{
+        const layerName = sanitizeLayer((multi ? fe.baseName + '_' : '') + (g.layer || 'KML'));
+        allGeoms.push({...g, layer: layerName});
+      });
+    });
+    const projected = projectGeoms(allGeoms, mode);
+    const layerSet = [...new Set(projected.map(g=>g.layer))];
+    const fmt = n => n.toFixed(precision);
+
+    let ents = '';
+    projected.forEach(g=>{
+      if(g.type === 'point'){
+        const [x,y,z] = g.rings[0][0];
+        ents += `0\nPOINT\n8\n${g.layer}\n10\n${fmt(x)}\n20\n${fmt(y)}\n30\n${fmt(z)}\n`;
+      } else {
+        g.rings.forEach(ring=>{
+          const closed = g.type === 'polygon';
+          ents += `0\nPOLYLINE\n8\n${g.layer}\n66\n1\n70\n${closed?1:0}\n`;
+          ring.forEach(p=>{
+            ents += `0\nVERTEX\n8\n${g.layer}\n10\n${fmt(p[0])}\n20\n${fmt(p[1])}\n30\n${fmt(p[2])}\n`;
+          });
+          ents += `0\nSEQEND\n`;
+        });
+      }
+    });
+
+    let layerDefs = '';
+    layerSet.forEach(l=>{
+      layerDefs += `0\nLAYER\n2\n${l}\n70\n0\n62\n7\n6\nCONTINUOUS\n`;
+    });
+
+    return `0
+SECTION
+2
+HEADER
+9
+$ACADVER
+1
+AC1009
+0
+ENDSEC
+0
+SECTION
+2
+TABLES
+0
+TABLE
+2
+LAYER
+70
+${layerSet.length}
+${layerDefs}0
+ENDTAB
+0
+ENDSEC
+0
+SECTION
+2
+ENTITIES
+${ents}0
+ENDSEC
+0
+EOF
+`;
+  }
+
+  function downloadBlob(content, filename, type){
+    const blob = new Blob([content], {type: type || 'text/plain'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = filename;
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    setTimeout(()=>URL.revokeObjectURL(url), 4000);
+  }
+
+  convertBtn.addEventListener('click', async ()=>{
+    const valid = loadedFiles.filter(e=>!e.errorKey && e.geoms.length);
+    if(valid.length===0) return;
+    const mode = document.querySelector('input[name=coordMode]:checked').value;
+    const outMode = document.querySelector('input[name=outMode]:checked').value;
+    let precision = parseInt(precisionInput.value,10);
+    if(isNaN(precision) || precision<0) precision = 3;
+    if(precision>8) precision = 8;
+
+    statusMsg.textContent = t('statusConverting');
+    statusMsg.className = 'status-msg';
+    convertBtn.disabled = true;
+
+    try{
+      if(outMode === 'merged'){
+        const dxf = buildDXF(valid, mode, precision);
+        const name = valid.length===1 ? valid[0].baseName + '.dxf' : 'converted_merged.dxf';
+        downloadBlob(dxf, name, 'application/dxf');
+      } else {
+        const zip = new JSZip();
+        valid.forEach(fe=>{
+          const dxf = buildDXF([fe], mode, precision);
+          zip.file(fe.baseName + '.dxf', dxf);
+        });
+        const blob = await zip.generateAsync({type:'blob'});
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url; a.download = 'dxf_output.zip';
+        document.body.appendChild(a); a.click(); document.body.removeChild(a);
+        setTimeout(()=>URL.revokeObjectURL(url), 4000);
+      }
+      statusMsg.textContent = t('statusOk');
+      statusMsg.className = 'status-msg ok';
+    } catch(err){
+      statusMsg.textContent = t('statusErr') + (err.message || '');
+      statusMsg.className = 'status-msg err';
+    } finally {
+      convertBtn.disabled = false;
+    }
+  });
+
+  applyLang();
+})();
+</script>
+</body>
+</html>
