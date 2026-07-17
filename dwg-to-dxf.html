@@ -1,0 +1,602 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DWG → DXF | راهنما</title>
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=IBM+Plex+Sans:wght@400;500;600&family=Vazirmatn:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#F6F3EA;
+    --paper-2:#EFEADC;
+    --ink:#1E3A5F;
+    --ink-2:#33587F;
+    --line:#B9C7D6;
+    --rust:#B5462A;
+    --rust-2:#8f371f;
+    --text:#20242b;
+    --white:#fffdf7;
+  }
+
+  *{box-sizing:border-box;margin:0;padding:0;}
+
+  html{scroll-behavior:smooth;}
+
+  body{
+    background:var(--paper);
+    color:var(--text);
+    font-family:'Vazirmatn','IBM Plex Sans',sans-serif;
+    line-height:1.8;
+    background-image:
+      linear-gradient(var(--line) 1px, transparent 1px),
+      linear-gradient(90deg, var(--line) 1px, transparent 1px);
+    background-size: 28px 28px;
+    background-position: -1px -1px;
+    background-attachment: fixed;
+  }
+
+  body.lang-en{
+    font-family:'IBM Plex Sans','Vazirmatn',sans-serif;
+  }
+
+  /* ---- language switching ---- */
+  .fa-only, .en-only{}
+  body.lang-fa .en-only{display:none;}
+  body.lang-en .fa-only{display:none;}
+  body.lang-en{direction:ltr;}
+  body.lang-fa{direction:rtl;}
+
+  .mono{font-family:'Space Mono',monospace;}
+  body.lang-fa .mono-fa{font-family:'Vazirmatn',sans-serif; letter-spacing:0;}
+
+  /* ---- layout shell ---- */
+  .sheet{
+    max-width:920px;
+    margin:32px auto;
+    background:var(--white);
+    border:1.5px solid var(--ink);
+    position:relative;
+    box-shadow: 6px 6px 0 rgba(30,58,95,0.08);
+  }
+
+  .corner{
+    position:absolute;
+    width:14px;height:14px;
+    border:1.5px solid var(--rust);
+  }
+  .corner.tl{top:-1.5px;left:-1.5px;border-right:none;border-bottom:none;}
+  .corner.tr{top:-1.5px;right:-1.5px;border-left:none;border-bottom:none;}
+  .corner.bl{bottom:-1.5px;left:-1.5px;border-right:none;border-top:none;}
+  .corner.br{bottom:-1.5px;right:-1.5px;border-left:none;border-top:none;}
+
+  /* ---- title block header ---- */
+  .titleblock{
+    border-bottom:1.5px solid var(--ink);
+    display:grid;
+    grid-template-columns: 1fr auto;
+  }
+  .tb-main{
+    padding:28px 32px 20px;
+  }
+  .tb-eyebrow{
+    font-family:'Space Mono',monospace;
+    font-size:12px;
+    letter-spacing:.14em;
+    color:var(--rust);
+    text-transform:uppercase;
+    margin-bottom:10px;
+  }
+  .tb-title{
+    font-size:clamp(28px,4vw,40px);
+    font-weight:700;
+    color:var(--ink);
+    line-height:1.25;
+  }
+  body.lang-en .tb-title{font-family:'Space Mono',monospace; letter-spacing:-0.01em;}
+  .tb-sub{
+    margin-top:10px;
+    color:var(--ink-2);
+    font-size:15.5px;
+    max-width:56ch;
+  }
+  .tb-fields{
+    border-inline-start:1.5px solid var(--ink);
+    display:grid;
+    grid-template-rows:repeat(3,1fr);
+    min-width:150px;
+  }
+  .tb-field{
+    padding:8px 16px;
+    border-bottom:1px solid var(--line);
+    font-family:'Space Mono',monospace;
+    font-size:10.5px;
+  }
+  .tb-field:last-child{border-bottom:none;}
+  .tb-field .k{color:var(--ink-2); letter-spacing:.08em; text-transform:uppercase; font-size:9.5px;}
+  .tb-field .v{color:var(--ink); font-weight:700; margin-top:2px;}
+
+  /* language toggle */
+  .langtoggle{
+    position:absolute;
+    top:14px;
+    inset-inline-end:14px;
+    display:flex;
+    gap:0;
+    border:1.5px solid var(--ink);
+    font-family:'Space Mono',monospace;
+    font-size:12px;
+    z-index:5;
+    background:var(--white);
+  }
+  .langtoggle button{
+    border:none;
+    background:transparent;
+    padding:7px 14px;
+    cursor:pointer;
+    color:var(--ink);
+    font-family:inherit;
+    font-size:inherit;
+    letter-spacing:.05em;
+  }
+  .langtoggle button.active{
+    background:var(--ink);
+    color:var(--white);
+  }
+  .langtoggle .sep{width:1.5px;background:var(--ink);}
+
+  .home-btn{
+    position:absolute;
+    top:14px;
+    inset-inline-start:14px;
+    display:inline-block;
+    border:1.5px solid var(--ink);
+    background:var(--white);
+    color:var(--ink);
+    font-family:'Space Mono',monospace;
+    font-size:12px;
+    letter-spacing:.05em;
+    padding:8px 14px;
+    text-decoration:none;
+    z-index:5;
+  }
+  .home-btn:hover{ background:var(--ink); color:var(--white); }
+
+  /* ---- content sections ---- */
+  .content{padding:8px 32px 40px;}
+
+  .section{
+    padding:28px 0;
+    border-bottom:1px dashed var(--line);
+  }
+  .section:last-child{border-bottom:none;}
+
+  .section-label{
+    font-family:'Space Mono',monospace;
+    font-size:11px;
+    letter-spacing:.12em;
+    text-transform:uppercase;
+    color:var(--rust);
+    display:flex;
+    align-items:center;
+    gap:10px;
+    margin-bottom:14px;
+  }
+  .section-label::after{
+    content:"";
+    flex:1;
+    height:1px;
+    background:var(--line);
+  }
+
+  .section h2{
+    font-size:22px;
+    color:var(--ink);
+    margin-bottom:6px;
+  }
+  body.lang-en .section h2{font-family:'Space Mono',monospace;}
+
+  .section p{margin-bottom:12px; color:var(--text);}
+
+  /* step list */
+  .steps{list-style:none; counter-reset:step; margin-top:18px; display:grid; gap:14px;}
+  .steps li{
+    counter-increment:step;
+    display:grid;
+    grid-template-columns:auto 1fr;
+    gap:16px;
+    align-items:start;
+  }
+  .steps li::before{
+    content:counter(step,decimal-leading-zero);
+    font-family:'Space Mono',monospace;
+    font-weight:700;
+    color:var(--rust);
+    background:var(--paper-2);
+    border:1.5px solid var(--ink);
+    width:34px;height:34px;
+    display:flex;align-items:center;justify-content:center;
+    font-size:13px;
+    flex-shrink:0;
+  }
+  .steps .step-body b{color:var(--ink);}
+  .steps .step-body{padding-top:4px;}
+  .steps code{
+    background:var(--paper-2);
+    border:1px solid var(--line);
+    padding:1px 6px;
+    font-family:'Space Mono',monospace;
+    font-size:0.92em;
+    color:var(--ink);
+  }
+
+  /* method tabs */
+  .methods{display:grid; gap:16px; margin-top:16px;}
+  .method{
+    border:1.5px solid var(--ink);
+    background:var(--paper-2);
+  }
+  .method-head{
+    padding:12px 18px;
+    border-bottom:1.5px solid var(--ink);
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:12px;
+  }
+  .method-head h3{font-size:16px; color:var(--ink);}
+  body.lang-en .method-head h3{font-family:'Space Mono',monospace; font-size:14px;}
+  .tag{
+    font-family:'Space Mono',monospace;
+    font-size:10px;
+    letter-spacing:.08em;
+    text-transform:uppercase;
+    color:var(--white);
+    background:var(--ink-2);
+    padding:3px 9px;
+    white-space:nowrap;
+  }
+  .tag.free{background:var(--rust);}
+  .method-body{padding:16px 18px;}
+  .method-body ol{margin-inline-start:20px; display:grid; gap:6px;}
+  .method-body p{margin-bottom:8px;}
+
+  /* callout / note */
+  .callout{
+    border-inline-start:4px solid var(--rust);
+    background:var(--paper-2);
+    padding:14px 18px;
+    margin-top:16px;
+    font-size:14.5px;
+  }
+  .callout .callout-label{
+    font-family:'Space Mono',monospace;
+    font-size:11px;
+    letter-spacing:.1em;
+    text-transform:uppercase;
+    color:var(--rust);
+    margin-bottom:6px;
+    display:block;
+  }
+
+  /* table */
+  table{width:100%; border-collapse:collapse; margin-top:14px; font-size:14px;}
+  th,td{border:1px solid var(--line); padding:8px 12px; text-align:start;}
+  th{background:var(--paper-2); color:var(--ink); font-family:'Space Mono',monospace; font-size:11.5px; letter-spacing:.05em; text-transform:uppercase;}
+
+  /* faq */
+  details{
+    border-bottom:1px solid var(--line);
+    padding:12px 0;
+  }
+  details:last-child{border-bottom:none;}
+  summary{
+    cursor:pointer;
+    font-weight:600;
+    color:var(--ink);
+    list-style:none;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+  }
+  summary::-webkit-details-marker{display:none;}
+  summary::after{
+    content:"+";
+    font-family:'Space Mono',monospace;
+    color:var(--rust);
+    font-size:18px;
+    flex-shrink:0;
+    margin-inline-start:12px;
+  }
+  details[open] summary::after{content:"–";}
+  details p{margin-top:8px; color:var(--ink-2);}
+
+  footer{
+    text-align:center;
+    padding:22px;
+    font-family:'Space Mono',monospace;
+    font-size:11px;
+    color:var(--ink-2);
+    letter-spacing:.05em;
+  }
+
+  @media (max-width:640px){
+    .titleblock{grid-template-columns:1fr;}
+    .tb-fields{border-inline-start:none; border-top:1.5px solid var(--ink); grid-template-columns:repeat(3,1fr); grid-template-rows:none;}
+    .tb-field{border-bottom:none; border-inline-end:1px solid var(--line);}
+    .content{padding:8px 18px 32px;}
+    .langtoggle{position:static; margin:14px 18px 0; width:fit-content;}
+    .home-btn{position:static; display:block; margin:14px 18px 0; width:fit-content;}
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    html{scroll-behavior:auto;}
+  }
+</style>
+</head>
+<body class="lang-fa">
+
+<div class="sheet">
+  <span class="corner tl"></span><span class="corner tr"></span>
+  <span class="corner bl"></span><span class="corner br"></span>
+
+  <a class="home-btn" href="../index.html">
+    <span class="fa-only">بازگشت به فرم اصلی</span>
+    <span class="en-only">Back to main form</span>
+  </a>
+
+  <div class="langtoggle" role="group" aria-label="Language / زبان">
+    <button id="btn-fa" class="active" onclick="setLang('fa')">FA</button>
+    <span class="sep"></span>
+    <button id="btn-en" onclick="setLang('en')">EN</button>
+  </div>
+
+  <div class="titleblock">
+    <div class="tb-main">
+      <div class="tb-eyebrow fa-only">راهنمای فنی</div>
+      <div class="tb-eyebrow en-only">technical guide</div>
+
+      <h1 class="tb-title fa-only">گرفتن خروجی DXF از فایل DWG</h1>
+      <h1 class="tb-title en-only">Exporting a DXF File from DWG</h1>
+
+      <p class="tb-sub fa-only">راهنمای گام‌به‌گام برای تبدیل فایل‌های نقشه‌کشی DWG به فرمت قابل‌تبادل DXF، با استفاده از AutoCAD، ابزار رایگان DWG TrueView یا مبدل‌های آنلاین.</p>
+      <p class="tb-sub en-only">A step-by-step guide to converting DWG drawing files into the exchangeable DXF format, using AutoCAD, the free DWG TrueView tool, or an online converter.</p>
+    </div>
+    <div class="tb-fields">
+      <div class="tb-field"><div class="k mono fa-only">فرمت مبدأ</div><div class="k mono en-only">source</div><div class="v mono">DWG</div></div>
+      <div class="tb-field"><div class="k mono fa-only">فرمت مقصد</div><div class="k mono en-only">output</div><div class="v mono">DXF</div></div>
+      <div class="tb-field"><div class="k mono fa-only">سطح</div><div class="k mono en-only">level</div><div class="v mono fa-only">مبتدی</div><div class="v mono en-only">Beginner</div></div>
+    </div>
+  </div>
+
+  <div class="content">
+
+    <!-- WHY -->
+    <section class="section">
+      <div class="section-label mono">01 <span class="fa-only mono-fa">/ چرا DXF؟</span><span class="en-only">/ why dxf</span></div>
+      <h2 class="fa-only">فرمت DXF چیست و چه زمانی لازم است؟</h2>
+      <h2 class="en-only">What is DXF, and when do you need it?</h2>
+      <p class="fa-only">DXF (Drawing Exchange Format) یک فرمت متنی و باز است که توسط اتودسک برای اشتراک‌گذاری داده‌های نقشه بین نرم‌افزارهای مختلف طراحی شده است. برخلاف DWG که یک فرمت بسته و اختصاصی است، اکثر نرم‌افزارهای CAD، CAM و GIS می‌توانند فایل‌های DXF را بدون مشکل باز کنند.</p>
+      <p class="en-only">DXF (Drawing Exchange Format) is an open, text-based format created by Autodesk to share drawing data between different software packages. Unlike DWG, which is a closed, proprietary format, most CAD, CAM, and GIS applications can open DXF files without compatibility issues.</p>
+    </section>
+
+    <!-- OVERVIEW STEPS -->
+    <section class="section">
+      <div class="section-label mono">02 <span class="fa-only mono-fa">/ روند کلی</span><span class="en-only">/ overview</span></div>
+      <h2 class="fa-only">روند کلی تبدیل، در ۴ گام</h2>
+      <h2 class="en-only">The conversion process, in 4 steps</h2>
+
+      <ol class="steps">
+        <li>
+          <div class="step-body fa-only">فایل <b>DWG</b> را در نرم‌افزار CAD مورد نظر خود باز کنید.</div>
+          <div class="step-body en-only">Open the <b>DWG</b> file in your CAD application of choice.</div>
+        </li>
+        <li>
+          <div class="step-body fa-only">از منو گزینه <b>Save As</b> یا <b>Export</b> را انتخاب کنید.</div>
+          <div class="step-body en-only">Choose <b>Save As</b> or <b>Export</b> from the menu.</div>
+        </li>
+        <li>
+          <div class="step-body fa-only">از لیست فرمت‌ها، <code>.dxf</code> و نسخه (Version) مناسب را انتخاب کنید.</div>
+          <div class="step-body en-only">From the format list, select <code>.dxf</code> and the appropriate version.</div>
+        </li>
+        <li>
+          <div class="step-body fa-only">فایل را ذخیره کرده و در صورت نیاز، آن را در نرم‌افزار مقصد باز کنید تا از صحت خروجی مطمئن شوید.</div>
+          <div class="step-body en-only">Save the file, then open it in the target application to confirm the export is correct.</div>
+        </li>
+      </ol>
+    </section>
+
+    <!-- METHODS -->
+    <section class="section">
+      <div class="section-label mono">03 <span class="fa-only mono-fa">/ روش‌ها</span><span class="en-only">/ methods</span></div>
+      <h2 class="fa-only">سه روش برای گرفتن خروجی DXF</h2>
+      <h2 class="en-only">Three ways to export DXF</h2>
+
+      <div class="methods">
+
+        <!-- AutoCAD -->
+        <div class="method">
+          <div class="method-head">
+            <h3 class="fa-only">روش اول — AutoCAD</h3>
+            <h3 class="en-only">Method 1 — AutoCAD</h3>
+            <span class="tag fa-only">نیاز به لایسنس</span>
+            <span class="tag en-only">licensed software</span>
+          </div>
+          <div class="method-body">
+            <ol class="fa-only">
+              <li>فایل DWG را در AutoCAD باز کنید.</li>
+              <li>دستور <code>SAVEAS</code> را در خط فرمان بنویسید، یا از مسیر <code>File › Save As</code> استفاده کنید.</li>
+              <li>در کادر «Files of type»، فرمت <code>AutoCAD DXF (*.dxf)</code> و نسخه مناسب (مثلاً 2018 یا R12) را انتخاب کنید.</li>
+              <li>نام و محل ذخیره را مشخص کرده و روی <code>Save</code> بزنید.</li>
+            </ol>
+            <ol class="en-only">
+              <li>Open the DWG file in AutoCAD.</li>
+              <li>Type the <code>SAVEAS</code> command, or go to <code>File › Save As</code>.</li>
+              <li>In "Files of type", pick <code>AutoCAD DXF (*.dxf)</code> and the matching version (e.g. 2018 or R12).</li>
+              <li>Set the file name and location, then click <code>Save</code>.</li>
+            </ol>
+          </div>
+        </div>
+
+        <!-- DWG TrueView -->
+        <div class="method">
+          <div class="method-head">
+            <h3 class="fa-only">روش دوم — DWG TrueView</h3>
+            <h3 class="en-only">Method 2 — DWG TrueView</h3>
+            <span class="tag free fa-only">رایگان</span>
+            <span class="tag free en-only">free</span>
+          </div>
+          <div class="method-body">
+            <p class="fa-only">اگر AutoCAD ندارید، ابزار رایگان <b>DWG TrueView</b> از اتودسک همین کار را به‌سادگی انجام می‌دهد.</p>
+            <p class="en-only">If you don't have AutoCAD, Autodesk's free <b>DWG TrueView</b> tool does the same job.</p>
+            <ol class="fa-only">
+              <li>DWG TrueView را نصب و اجرا کنید و فایل DWG را باز کنید.</li>
+              <li>از منو <code>File › Save As</code> را انتخاب کنید.</li>
+              <li>فرمت <code>DXF</code> و نسخه دلخواه را انتخاب و ذخیره کنید.</li>
+            </ol>
+            <ol class="en-only">
+              <li>Install and open DWG TrueView, then open the DWG file.</li>
+              <li>Go to <code>File › Save As</code>.</li>
+              <li>Choose the <code>DXF</code> format and desired version, then save.</li>
+            </ol>
+          </div>
+        </div>
+
+        <!-- Online -->
+        <div class="method">
+          <div class="method-head">
+            <h3 class="fa-only">روش سوم — مبدل آنلاین</h3>
+            <h3 class="en-only">Method 3 — Online converter</h3>
+            <span class="tag fa-only">بدون نصب</span>
+            <span class="tag en-only">no install</span>
+          </div>
+          <div class="method-body">
+            <p class="fa-only">برای تبدیل سریع و بدون نصب نرم‌افزار، می‌توان از مبدل‌های آنلاین DWG به DXF استفاده کرد.</p>
+            <p class="en-only">For a quick conversion without installing anything, an online DWG-to-DXF converter can be used.</p>
+            <ol class="fa-only">
+              <li>فایل DWG را در وب‌سایت مبدل آپلود کنید.</li>
+              <li>فرمت خروجی DXF و نسخه را انتخاب کنید.</li>
+              <li>فایل تبدیل‌شده را دانلود کنید.</li>
+            </ol>
+            <ol class="en-only">
+              <li>Upload the DWG file to the converter's website.</li>
+              <li>Select DXF as the output format and choose a version.</li>
+              <li>Download the converted file.</li>
+            </ol>
+            <div class="callout" style="margin-top:14px;">
+              <span class="callout-label fa-only">توجه</span>
+              <span class="callout-label en-only">note</span>
+              <span class="fa-only">برای فایل‌های محرمانه یا پروژه‌های حساس، از آپلود در سرویس‌های آنلاین ناشناس خودداری کنید.</span>
+              <span class="en-only">Avoid uploading confidential or sensitive project files to unfamiliar online services.</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- VERSION TABLE -->
+    <section class="section">
+      <div class="section-label mono">04 <span class="fa-only mono-fa">/ انتخاب نسخه</span><span class="en-only">/ choosing a version</span></div>
+      <h2 class="fa-only">کدام نسخه DXF را انتخاب کنم؟</h2>
+      <h2 class="en-only">Which DXF version should I choose?</h2>
+      <p class="fa-only">نرم‌افزار مقصد تعیین می‌کند کدام نسخه را باید انتخاب کنید. نسخه‌های قدیمی‌تر سازگاری بیشتری دارند اما ممکن است برخی عناصر جدید را پشتیبانی نکنند.</p>
+      <p class="en-only">The target software determines which version to pick. Older versions are more broadly compatible but may not support newer drawing elements.</p>
+      <table>
+        <thead>
+          <tr>
+            <th class="fa-only">نسخه</th><th class="en-only">Version</th>
+            <th class="fa-only">مناسب برای</th><th class="en-only">Best for</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="mono">R12</td>
+            <td class="fa-only">حداکثر سازگاری با نرم‌افزارهای قدیمی و GIS</td>
+            <td class="en-only">Maximum compatibility with legacy and GIS software</td>
+          </tr>
+          <tr>
+            <td class="mono">2004 – 2010</td>
+            <td class="fa-only">اکثر نرم‌افزارهای CAD متداول</td>
+            <td class="en-only">Most common CAD applications</td>
+          </tr>
+          <tr>
+            <td class="mono">2013 – 2018</td>
+            <td class="fa-only">نسخه‌های جدیدتر با پشتیبانی از عناصر پیشرفته</td>
+            <td class="en-only">Newer software, supports advanced elements</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- TIPS -->
+    <section class="section">
+      <div class="section-label mono">05 <span class="fa-only mono-fa">/ نکات مهم</span><span class="en-only">/ good practice</span></div>
+      <h2 class="fa-only">نکاتی پیش از ذخیره‌سازی</h2>
+      <h2 class="en-only">Things to check before saving</h2>
+      <ol class="steps">
+        <li>
+          <div class="step-body fa-only"><b>واحدها را بررسی کنید:</b> مطمئن شوید واحد ترسیم (میلی‌متر، متر یا اینچ) با نرم‌افزار مقصد یکسان است.</div>
+          <div class="step-body en-only"><b>Check units:</b> make sure the drawing units (mm, m, or inches) match what the target software expects.</div>
+        </li>
+        <li>
+          <div class="step-body fa-only"><b>لایه‌ها (Layers) را مرور کنید:</b> DXF لایه‌ها را حفظ می‌کند، اما نام‌گذاری متفاوت ممکن است در نرم‌افزار مقصد به‌هم بریزد.</div>
+          <div class="step-body en-only"><b>Review layers:</b> DXF preserves layers, but naming conventions may look different once opened in the target software.</div>
+        </li>
+        <li>
+          <div class="step-body fa-only"><b>بلوک‌های پیچیده را در نظر بگیرید:</b> برخی نرم‌افزارها بلوک‌های تودرتو یا External References را به‌درستی نمی‌خوانند؛ در صورت نیاز آن‌ها را Explode کنید.</div>
+          <div class="step-body en-only"><b>Watch complex blocks:</b> some applications don't read nested blocks or external references correctly; explode them first if needed.</div>
+        </li>
+      </ol>
+    </section>
+
+    <!-- FAQ -->
+    <section class="section">
+      <div class="section-label mono">06 <span class="fa-only mono-fa">/ پرسش‌های متداول</span><span class="en-only">/ faq</span></div>
+      <h2 class="fa-only">سوالات متداول</h2>
+      <h2 class="en-only">Frequently asked questions</h2>
+
+      <details open>
+        <summary class="fa-only">آیا تبدیل DWG به DXF باعث افت کیفیت می‌شود؟</summary>
+        <summary class="en-only">Does converting DWG to DXF lose quality?</summary>
+        <p class="fa-only">خیر، هندسه و اطلاعات نقشه حفظ می‌شود؛ اما برخی ویژگی‌های اختصاصی نرم‌افزار (مانند برخی آبجکت‌های پویا) ممکن است پشتیبانی نشوند.</p>
+        <p class="en-only">No, the geometry and drawing data are preserved; however, some software-specific features (like certain dynamic objects) may not be supported.</p>
+      </details>
+
+      <details>
+        <summary class="fa-only">آیا می‌توانم بدون AutoCAD این کار را انجام دهم؟</summary>
+        <summary class="en-only">Can I do this without AutoCAD?</summary>
+        <p class="fa-only">بله، ابزار رایگان DWG TrueView یا مبدل‌های آنلاین برای این منظور کافی هستند.</p>
+        <p class="en-only">Yes — the free DWG TrueView tool or an online converter is enough for this task.</p>
+      </details>
+
+      <details>
+        <summary class="fa-only">چرا فایل خروجی در نرم‌افزار مقصد درست نمایش داده نمی‌شود؟</summary>
+        <summary class="en-only">Why doesn't the exported file display correctly in the target app?</summary>
+        <p class="fa-only">معمولاً به دلیل ناسازگاری نسخه DXF یا تفاوت در واحدهای ترسیم است. نسخه قدیمی‌تری را امتحان کنید و واحدها را بررسی کنید.</p>
+        <p class="en-only">This is usually caused by a DXF version mismatch or a difference in drawing units. Try an older version and double-check the units.</p>
+      </details>
+    </section>
+
+  </div>
+</div>
+
+<footer>
+  <span class="fa-only mono-fa">راهنمای فنی — DWG به DXF</span>
+  <span class="en-only mono">technical guide — dwg to dxf</span>
+</footer>
+
+<script>
+  function setLang(lang){
+    document.body.classList.remove('lang-fa','lang-en');
+    document.body.classList.add('lang-'+lang);
+    document.documentElement.lang = lang;
+    document.documentElement.dir = lang === 'fa' ? 'rtl' : 'ltr';
+    document.getElementById('btn-fa').classList.toggle('active', lang==='fa');
+    document.getElementById('btn-en').classList.toggle('active', lang==='en');
+  }
+</script>
+
+</body>
+</html>
