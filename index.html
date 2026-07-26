@@ -724,6 +724,7 @@ const translations = {
     errFileRead: 'خواندن فایل با خطا مواجه شد.',
     warnUtmRange: 'برخی مختصات خام در بازهٔ معمول UTM قرار ندارند — زون یا نیمکرهٔ انتخابی را بررسی کنید.',
     warnOutOfRange: 'برخی مختصات خارج از بازهٔ معتبر طول/عرض جغرافیایی هستند — این فایل احتمالاً با سیستم مختصات دیگری رسم شده است.',
+    warnMapUnavailable: 'کتابخانهٔ نقشه (Leaflet) بارگذاری نشد (احتمالاً به‌دلیل فیلترشدن CDN در شبکهٔ شما) — پیش‌نمایش نقشه غیرفعال است، اما فایل خروجی به‌درستی ساخته می‌شود.',
     d2kReady: (n, layers) => `${n} عنصر روی ${layers} لایه رسم شد`,
     d2kDone: (n) => `آمادهٔ دانلود — ${n} عنصر`,
     k2dDone: (n) => `${n} موضوع تبدیل شد`,
@@ -825,6 +826,7 @@ const translations = {
     errFileRead: 'Failed to read the file.',
     warnUtmRange: 'Some raw coordinates fall outside the typical UTM range — double-check the zone or hemisphere you selected.',
     warnOutOfRange: 'Some coordinates fall outside the valid latitude/longitude range — this file was likely drawn in a different coordinate system.',
+    warnMapUnavailable: 'The map library (Leaflet) failed to load (likely blocked by your network\'s CDN filtering) — the map preview is disabled, but the output file is still generated correctly.',
     d2kReady: (n, layers) => `${n} entities drawn across ${layers} layers`,
     d2kDone: (n) => `Ready to download — ${n} entities`,
     k2dDone: (n) => `${n} feature(s) converted`,
@@ -1286,9 +1288,25 @@ const D2K = (function(){
   let wired = false;
   let map = null, mapLayerGroup = null;
   let currentKml = null;
+  let leafletAvailable = true;
 
   function initMap(){
     if (map) return;
+    if (leafletAvailable === false) return;
+    if (typeof L === 'undefined'){
+      leafletAvailable = false;
+      const mapEl = document.getElementById('d2k_map');
+      mapEl.style.display = 'flex';
+      mapEl.style.alignItems = 'center';
+      mapEl.style.justifyContent = 'center';
+      mapEl.style.padding = '20px';
+      mapEl.style.textAlign = 'center';
+      mapEl.style.fontFamily = "'Space Mono',monospace";
+      mapEl.style.fontSize = '12px';
+      mapEl.style.color = '#9fb3bd';
+      mapEl.textContent = t('warnMapUnavailable');
+      return;
+    }
     map = L.map('d2k_map', {zoomControl:true}).setView([20,0], 2);
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       attribution:'&copy; OpenStreetMap', maxZoom:19
@@ -1372,31 +1390,39 @@ const D2K = (function(){
         currentKml = buildKml(features, layerNames);
 
         initMap();
-        mapLayerGroup.clearLayers();
+        if (mapLayerGroup) mapLayerGroup.clearLayers();
         const boundsPts = [];
         features.forEach((f)=>{
           const color = colorForLayer(f.layer, layerNames.indexOf(f.layer));
           if (f.kind === 'point'){
-            const mk = L.circleMarker([f.coords[1], f.coords[0]], {radius:4, color:color, fillOpacity:0.9});
-            if (f.label) mk.bindTooltip(f.label);
-            mk.addTo(mapLayerGroup);
+            if (leafletAvailable){
+              const mk = L.circleMarker([f.coords[1], f.coords[0]], {radius:4, color:color, fillOpacity:0.9});
+              if (f.label) mk.bindTooltip(f.label);
+              mk.addTo(mapLayerGroup);
+            }
             boundsPts.push([f.coords[1], f.coords[0]]);
           } else {
             const latlngs = f.coords.map(c=>[c[1],c[0]]);
-            if (f.kind === 'polygon'){
-              L.polygon(latlngs, {color:color, weight:2, fillOpacity:0.25}).addTo(mapLayerGroup);
-            } else {
-              L.polyline(latlngs, {color:color, weight:2}).addTo(mapLayerGroup);
+            if (leafletAvailable){
+              if (f.kind === 'polygon'){
+                L.polygon(latlngs, {color:color, weight:2, fillOpacity:0.25}).addTo(mapLayerGroup);
+              } else {
+                L.polyline(latlngs, {color:color, weight:2}).addTo(mapLayerGroup);
+              }
             }
             latlngs.forEach(p=>boundsPts.push(p));
           }
         });
         if (boundsPts.length){
-          const bounds = L.latLngBounds(boundsPts);
-          map.fitBounds(bounds, {padding:[20,20]});
-          const c = bounds.getCenter();
+          const lats = boundsPts.map(p=>p[0]), lngs = boundsPts.map(p=>p[1]);
+          const centerLat = lats.reduce((a,b)=>a+b,0)/lats.length;
+          const centerLng = lngs.reduce((a,b)=>a+b,0)/lngs.length;
+          if (leafletAvailable){
+            const bounds = L.latLngBounds(boundsPts);
+            map.fitBounds(bounds, {padding:[20,20]});
+          }
           document.getElementById('d2k_mapCaptionLeft').textContent = t('d2kReady')(features.length, layerNames.length);
-          document.getElementById('d2k_mapCaptionRight').textContent = c.lat.toFixed(4) + ', ' + c.lng.toFixed(4);
+          document.getElementById('d2k_mapCaptionRight').textContent = centerLat.toFixed(4) + ', ' + centerLng.toFixed(4);
           const outOfRange = boundsPts.some(p => Math.abs(p[0])>90 || Math.abs(p[1])>180);
           if (outOfRange){
             warnBox.textContent = t('warnOutOfRange');
